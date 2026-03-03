@@ -651,22 +651,34 @@ function openModal(idx){
   }
   // Set ideas link
   const mIdeasEl=document.getElementById('mIdeasLink');
-  if(mIdeasEl){
-    if(o.ideas && o.ideas !== 'No such link is found'){
-      mIdeasEl.href=o.ideas;
-      mIdeasEl.textContent='View Ideas List →';
-      mIdeasEl.style.display='inline-block';
-    } else {
-      mIdeasEl.style.display='none';
+  const mIdeasText=document.getElementById('mIdeasText');
+  
+  let isValidIdeasUrl=false;
+  
+  if(mIdeasEl && o.ideas && o.ideas !== 'No such link is found'){
+    try {
+      // Prepend https:// if no protocol
+      let url=o.ideas;
+      if(!url.match(/^https?:\/\//i)){
+        url='https://'+url;
+      }
+      const urlObj=new URL(url);
+      // Only allow http and https
+      if(urlObj.protocol==='http:' || urlObj.protocol==='https:'){
+        mIdeasEl.href=url;
+        mIdeasEl.textContent='View Ideas List →';
+        isValidIdeasUrl=true;
+      }
+    } catch(e){
+      // Invalid URL - will be hidden below
     }
   }
-  const mIdeasText=document.getElementById('mIdeasText');
+  
+  if(mIdeasEl){
+    mIdeasEl.style.display=isValidIdeasUrl?'inline-flex':'none';
+  }
   if(mIdeasText){
-    if(o.ideas && o.ideas !== 'No such link is found'){
-      mIdeasText.style.display='none';
-    } else {
-      mIdeasText.style.display='block';
-    }
+    mIdeasText.style.display=isValidIdeasUrl?'none':'block';
   }
   updateModalCompareBtn();
   document.getElementById('modalBg').classList.add('open');
