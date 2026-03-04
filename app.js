@@ -940,3 +940,11 @@ updateStats();
 applyFilters();
 renderTrending();
 checkAPI();
+
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+const syncScrollTopBtn = () => {
+  scrollTopBtn?.classList.toggle('visible', window.scrollY > 400);
+};
+
+window.addEventListener('scroll', syncScrollTopBtn, { passive: true });
+syncScrollTopBtn();
