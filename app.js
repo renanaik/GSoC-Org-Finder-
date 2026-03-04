@@ -940,3 +940,8 @@ updateStats();
 applyFilters();
 renderTrending();
 checkAPI();
+
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTopBtn')
+    ?.classList.toggle('visible', window.scrollY > 400);
+});
