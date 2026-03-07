@@ -1,247 +1,122 @@
-## Project Philosophy
-
-
+\## Project Philosophy
 
 This repository follows a zero-build, zero-dependency philosophy.
 
+\## Principles
 
-
-## Principles:
-
-
-
-- No build tools
-
-
-
-- No unnecessary dependencies
-
-
-
-- Minimal runtime overhead
-
-
-
-- Simple and readable code
-
-
+\- No build tools
+\- No unnecessary dependencies
+\- Minimal runtime overhead
+\- Simple and readable code
 
 When contributing, avoid adding libraries, bundlers, or complex tooling unless clearly justified.
 
 
 
-## Architecture
-
-
+\## Architecture
 
 The project is built using Vercel Edge Functions.
 
+Key Characteristics
 
+\- Serverless execution at the edge
+\- Fast global responses
+\- Minimal backend infrastructure
+\- Lightweight runtime environment
 
-Key characteristics:
-
-
-
-- Serverless execution at the edge
-
-
-
-- Fast global responses
+Changes should remain compatible with the Edge Function architecture.
 
 
 
-- Minimal backend infrastructure
+\## Local Development
 
-
-
-- Lightweight runtime environment
-
-
-
-- Changes should remain compatible with the Edge Function architecture.
-
-
-
-## Local Development
-
-Install the CLI
-
-
-
-Install Vercel CLI globally:
-
-
+Install Vercel CLI
 
 npm install -g vercel
 
-Clone the repository
+\## Clone Repository
 
-git clone https://github.com/<repo-owner>/<repo-name>.git
+git clone https://github.com/<repo>.git  
+cd <repo>
 
-cd <repo-name>
-
-Run locally
+\## Run Locally
 
 vercel dev
 
-
-
-This command starts a local development server that simulates the Vercel environment.
-
-
-
-## Contribution Workflow
+This command simulates the Vercel environment locally.
 
 
 
-1. Fork the repository
+\## Contribution Workflow
+
+1\. Fork the repository
+2\. Create a branch from main
+3\. Make your changes
+4\. Make your changes
+5\. Commit your work
+6\. Push to your fork
+7\. Open a Pull Request
+8\. Commit Message Convention
+9\. Use clear and descriptive commit messages.
+
+\## Create Branch
+
+git checkout -b feature/short-description
 
 
 
-2. Create a branch from main
+\## Commit Message Convention
 
-
-
-3. git checkout -b feature/short-description
-
-
-
-4. Make your changes
-
-
-
-5. Commit your work
-
-
-
-6. Push to your fork
-
-
-
-7. Open a Pull Request
-
-
-
-8. Commit Message Convention
-
-
-
-9. Use clear and descriptive commit messages.
-
-
-
-## Format:
-
-
+\## Format:
 
 type: short description
 
-
-
 Examples:
 
+\- docs: add contributing guide  
+\- fix: correct edge function handler  
+\- feat: improve request validation
 
+\## Common Types
 
-docs: add contributing guide
-
-fix: correct edge function handler
-
-feat: improve request validation
-
-
-
-## Common types:
-
-
-
-- docs – documentation updates
+\- docs – documentation updates
+\- fix – bug fixes
+\- feat – new features
+\- refactor – internal improvements
 
 
 
-- fix – bug fixes
+\## Pull Request Guidelines
+
+\- Reference the issue number (Closes #issue)
+\- Keep changes minimal
+\- Follow project style
+\- Do not introduce build tools or dependencies
+
+Small PRs are easier to review and merge.
 
 
 
-- feat – new features
-
-
-
-- refactor – internal code improvements
-
-
-
-## Pull Request Guidelines
-
-
-
-When opening a Pull Request:
-
-
-
-- Reference the issue number (Closes `#issue`)
-
-
-
-- Keep changes focused and minimal
-
-
-
-- Follow the existing project style
-
-
-
-- Do not introduce build tools or dependencies
-
-
-
-- PRs that are small and clearly explained are easier to review and merge.
-
-
-
-## Testing and Verification
-
-
+\## Testing and Verification
 
 Before submitting a PR:
 
+\- Run the project locally
 
-
-- Run the project locally
-
-
-
-- vercel dev
-
-
+\- vercel dev
 
 Verify:
 
-
-
-- Edge functions run correctly
-
-
-
-- No build step is introduced
+\- Edge functions run correctly
+\- No build step is introduced
+\- No dependencies added
+\- Existing behavior unchanged
 
 
 
-- No new dependencies are added
+\## Need Help?
 
+If unsure:
 
-
-- Existing behavior remains intact
-
-
-
-## Need Help?
-
-
-
-If you are unsure about something:
-
-
-
-- Open an issue
-
-- Ask in the discussion thread
+\- Open an issue
+\- Ask in the discussion thread
