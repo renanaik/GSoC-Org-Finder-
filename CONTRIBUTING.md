@@ -52,12 +52,11 @@ This command simulates the Vercel environment locally.
 1\. Fork the repository
 2\. Create a branch from main
 3\. Make your changes
-4\. Make your changes
-5\. Commit your work
-6\. Push to your fork
-7\. Open a Pull Request
-8\. Commit Message Convention
-9\. Use clear and descriptive commit messages.
+4\. Commit your work
+5\. Push to your fork
+6\. Open a Pull Request
+7\. Commit Message Convention
+8\. Use clear and descriptive commit messages.
 
 \## Create Branch
 
