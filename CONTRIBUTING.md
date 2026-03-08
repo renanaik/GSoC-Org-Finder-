@@ -1,121 +1,139 @@
-\## Project Philosophy
+# Contributing Guide
 
-This repository follows a zero-build, zero-dependency philosophy.
+## Project Philosophy
 
-\## Principles
+This repository follows a **zero-build, zero-dependency philosophy**.
 
-\- No build tools
-\- No unnecessary dependencies
-\- Minimal runtime overhead
-\- Simple and readable code
+## Principles
 
-When contributing, avoid adding libraries, bundlers, or complex tooling unless clearly justified.
+- No build tools
+- No unnecessary dependencies
+- Minimal runtime overhead
+- Simple and readable code
 
+When contributing, avoid adding libraries, bundlers, or complex tooling **unless clearly justified**.
 
+---
 
-\## Architecture
+# Architecture
 
-The project is built using Vercel Edge Functions.
+The project is built using **Vercel Edge Functions**.
 
-Key Characteristics
+## Key Characteristics
 
-\- Serverless execution at the edge
-\- Fast global responses
-\- Minimal backend infrastructure
-\- Lightweight runtime environment
+- Serverless execution at the edge
+- Fast global responses
+- Minimal backend infrastructure
+- Lightweight runtime environment
 
-Changes should remain compatible with the Edge Function architecture.
+Changes should remain compatible with the **Edge Function architecture**.
 
+---
 
+# Local Development
 
-\## Local Development
+## Install Vercel CLI
 
-Install Vercel CLI
-
+```bash
 npm install -g vercel
+```
 
-\## Clone Repository
+## Clone Repository
 
-git clone https://github.com/<repo>.git  
+```bash
+git clone https://github.com/<repo>.git
 cd <repo>
+```
 
-\## Run Locally
+## Run Locally
 
+```bash
 vercel dev
+```
 
-This command simulates the Vercel environment locally.
+This command simulates the **Vercel environment locally**.
 
+---
 
+# Contribution Workflow
 
-\## Contribution Workflow
+1. Fork the repository
+2. Create a branch from `main`
+3. Make your changes
+4. Commit your work
+5. Push to your fork
+6. Open a Pull Request
 
-1\. Fork the repository
-2\. Create a branch from main
-3\. Make your changes
-4\. Commit your work
-5\. Push to your fork
-6\. Open a Pull Request
-7\. Commit Message Convention
-8\. Use clear and descriptive commit messages.
+---
 
-\## Create Branch
+# Create Branch
 
+```bash
 git checkout -b feature/short-description
+```
 
+---
 
+# Commit Message Convention
 
-\## Commit Message Convention
+## Format
 
-\## Format:
-
+```
 type: short description
+```
 
-Examples:
+## Examples
 
-\- docs: add contributing guide  
-\- fix: correct edge function handler  
-\- feat: improve request validation
+```
+docs: add contributing guide
+fix: correct edge function handler
+feat: improve request validation
+```
 
-\## Common Types
+## Common Types
 
-\- docs – documentation updates
-\- fix – bug fixes
-\- feat – new features
-\- refactor – internal improvements
+| Type | Description |
+|-----|-------------|
+| docs | Documentation updates |
+| fix | Bug fixes |
+| feat | New features |
+| refactor | Internal improvements |
 
+---
 
+# Pull Request Guidelines
 
-\## Pull Request Guidelines
+- Reference the issue number (`Closes #issue`)
+- Keep changes minimal
+- Follow project style
+- Do **not introduce build tools or dependencies**
 
-\- Reference the issue number (Closes #issue)
-\- Keep changes minimal
-\- Follow project style
-\- Do not introduce build tools or dependencies
+Small PRs are **easier to review and merge**.
 
-Small PRs are easier to review and merge.
+---
 
-
-
-\## Testing and Verification
+# Testing and Verification
 
 Before submitting a PR:
 
-\- Run the project locally
+Run the project locally:
 
-\- vercel dev
+```bash
+vercel dev
+```
 
 Verify:
 
-\- Edge functions run correctly
-\- No build step is introduced
-\- No dependencies added
-\- Existing behavior unchanged
+- Edge functions run correctly
+- No build step is introduced
+- No dependencies added
+- Existing behavior remains unchanged
 
+---
 
-
-\## Need Help?
+# Need Help?
 
 If unsure:
 
-\- Open an issue
-\- Ask in the discussion thread
+- Open an issue
+- Ask in the discussion thread
