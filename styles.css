@@ -407,11 +407,11 @@ footer a:hover{text-decoration:underline}
 .skeleton-line{height:12px;border-radius:4px;background-image:linear-gradient(90deg,var(--skeleton-base) 25%,var(--skeleton-shine) 50%,var(--skeleton-base) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite linear;}
 .skeleton-title{width:70%;}
 .skeleton-subtitle{width:50%;}
-.skeleton-body{height:40px;border-radius:6px;margin-bottom:12px;}
+.skeleton-body{height:40px;border-radius:6px;margin-bottom:12px;background-image:linear-gradient(90deg,var(--skeleton-base) 25%,var(--skeleton-shine) 50%,var(--skeleton-base) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite linear;}
 .skeleton-tags{display:flex;gap:8px;}
 .skeleton-pill{width:60px;height:20px;border-radius:100px;background-image:linear-gradient(90deg,var(--skeleton-base) 25%,var(--skeleton-shine) 50%,var(--skeleton-base) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite linear;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
-@media(prefers-reduced-motion:reduce){.skeleton-logo,.skeleton-line,.skeleton-pill{animation:none}}
+@media(prefers-reduced-motion:reduce){.skeleton-logo,.skeleton-line,.skeleton-body,.skeleton-pill{animation:none}}
 
 /* ── TABLET ── */
 @media(max-width:900px){
