@@ -1,3 +1,5 @@
+/* global ORGS */
+
 // ══════════════════════════════════════════════
 // THEME
 // ══════════════════════════════════════════════
@@ -55,7 +57,7 @@ const cdTimer=setInterval(updateCountdown,1000);
 // ══════════════════════════════════════════════
 const AN={
   g(k,d){try{return JSON.parse(localStorage.getItem('gaf_'+k))??d}catch{return d}},
-  s(k,v){try{localStorage.setItem('gaf_'+k,JSON.stringify(v))}catch{}},
+  s(k,v){try{localStorage.setItem('gaf_'+k,JSON.stringify(v))}catch(_err){/* ignore storage write failures */}},
   inc(k){this.s(k,(this.g(k,0)+1))},
   push(k,v,max=20){const a=this.g(k,[]);a.unshift(v);this.s(k,a.slice(0,max))},
   today(){return new Date().toISOString().slice(0,10)},
@@ -219,12 +221,12 @@ async function fetchGFI(repo){
   if(!repo)return null;
   const cacheKey=repo+'__gfi';
   const hit=cache[cacheKey];
-  if(hit&&Date.now()-hit.ts<3600000&&hit.count!=null)return hit.count;
+  if(hit&&Date.now()-hit.ts<3600000&&hit.count!==null&&hit.count!==undefined)return hit.count;
   try{
     const r=await fetch(`${API}?repo=${encodeURIComponent(repo)}&gfi=1`);
     if(!r.ok)return null;
     const d=await r.json();
-    if(d.gfi==null)return null;
+    if(d.gfi===null||d.gfi===undefined)return null;
     cache[cacheKey]={count:d.gfi,ts:Date.now()};
     localStorage.setItem('gaf_ghc',JSON.stringify(cache));
     return d.gfi;
@@ -376,7 +378,7 @@ function renderCompareTable(){
     {label:'Forks',       vals:arr.map(o=>o._gh?fmt(o._gh.forks):'—'), scores:arr.map(o=>o._gh?.forks||0), type:'scored', best:'high'},
     {label:'Open Issues', vals:arr.map(o=>o._gh?fmt(o._gh.issues):'—'), scores:arr.map(o=>o._gh?.issues||0), type:'scored', best:'low'},
     {label:'Last Commit', vals:arr.map(o=>o._gh?o._gh.lastCommit:'—'), type:'text'},
-    {label:'Good 1st Issues', vals:arr.map(o=>o._gh?.gfi!=null?fmt(o._gh.gfi):'—'), scores:arr.map(o=>o._gh?.gfi||0), type:'scored', best:'high'},
+    {label:'Good 1st Issues', vals:arr.map(o=>o._gh?.gfi!==null&&o._gh?.gfi!==undefined?fmt(o._gh.gfi):'—'), scores:arr.map(o=>o._gh?.gfi||0), type:'scored', best:'high'},
     {label:'Languages',   vals:arr.map(o=>o.tags.slice(0,3).join(', ')), type:'text'},
   ];
 
@@ -577,7 +579,7 @@ function renderGrid(orgs){
     const ghm=o._gh?`<div class="gh-mini">
       <span class="gh-s">⭐ <b>${fmt(o._gh.stars)}</b></span>
       <span class="gh-s">🍴 <b>${fmt(o._gh.forks)}</b></span>
-      ${o._gh.gfi!=null?`<span class="gh-s">🟢 <b>${fmt(o._gh.gfi)} GFI</b></span>`:''}
+      ${o._gh.gfi!==null&&o._gh.gfi!==undefined?`<span class="gh-s">🟢 <b>${fmt(o._gh.gfi)} GFI</b></span>`:''}
       <span class="gh-s">🕐 <b>${o._gh.lastCommit}</b></span>
     </div>`:'';
     const globalIdx=ORGS.indexOf(o);
@@ -745,13 +747,13 @@ function openModal(idx){
     <div class="ml">GSoC Years</div><div class="prog"><div class="prog-fill" style="width:${Math.min(o.years/11*100,100)}%;background:${o.years>=8?'#C2410C':o.years>=4?'var(--blue)':'var(--purple)'}"></div></div></div>
     <div class="mc"><div class="mv" style="color:${cc[o.competition]}">${o.competition==='hot'?'🔥':o.competition==='moderate'?'🟡':'😎'}</div><div class="ml">${cLbl(o.competition)}</div></div>
     <div class="mc"><div class="mv" style="color:var(--orange)">${o.firstYear}</div><div class="ml">First Year</div></div>
-    <div class="mc"><div class="mv" style="color:var(--green)">${o._gh?.gfi!=null?fmt(o._gh.gfi):'—'}</div><div class="ml">Good 1st Issues</div></div>`;
+    <div class="mc"><div class="mv" style="color:var(--green)">${o._gh?.gfi!==null&&o._gh?.gfi!==undefined?fmt(o._gh.gfi):'—'}</div><div class="ml">Good 1st Issues</div></div>`;
   const gh=o._gh;
   document.getElementById('ghStars').textContent=gh?fmt(gh.stars):'—';
   document.getElementById('ghForks').textContent=gh?fmt(gh.forks):'—';
   document.getElementById('ghIssues').textContent=gh?fmt(gh.issues):'—';
   document.getElementById('ghCommit').textContent=gh?gh.lastCommit:'—';
-  document.getElementById('ghGFI').textContent=gh?.gfi!=null?fmt(gh.gfi):'—';
+  document.getElementById('ghGFI').textContent=gh?.gfi!==null&&gh?.gfi!==undefined?fmt(gh.gfi):'—';
   document.getElementById('mFetchBtn').textContent=gh?'↻ Refresh':'Fetch Live Data';
   document.getElementById('mTags').innerHTML=o.tags.map(t=>`<span class="m-tag">${t}</span>`).join('');
   document.getElementById('mFit').innerHTML=o.fit.map(f=>`<span class="m-tag">${f}</span>`).join('');
@@ -793,7 +795,7 @@ function openModal(idx){
   document.getElementById('modalBg').classList.add('open');
   document.body.style.overflow='hidden';
   // Fetch GFI lazily on modal open
-  if(o.github&&(!o._gh||o._gh.gfi==null)){
+  if(o.github&&(!o._gh||o._gh.gfi===null||o._gh.gfi===undefined)){
     document.getElementById('ghGFI').textContent='…';
     fetchGFI(o.github).then(gfi=>{
       if(gfi!==null){
@@ -886,11 +888,11 @@ async function fetchAllIssues(){
           found+=data.items.length;
         }
         const gfiCount=data.total??data.gfi;
-        if(gfiCount!=null){
+        if(gfiCount!==null&&gfiCount!==undefined){
           if(!o._gh)o._gh={};
           o._gh.gfi=gfiCount;
         }
-      }catch(e){}
+      }catch(_err){/* ignore fetch/parse errors for unavailable repos */}
       done++;
     }));
     // Update progress UI
