@@ -57,7 +57,13 @@ const cdTimer=setInterval(updateCountdown,1000);
 // ══════════════════════════════════════════════
 const AN={
   g(k,d){try{return JSON.parse(localStorage.getItem('gaf_'+k))??d}catch{return d}},
-  s(k,v){try{localStorage.setItem('gaf_'+k,JSON.stringify(v))}catch(_err){/* ignore storage write failures */}},
+  s(k,v){
+    try{
+      localStorage.setItem('gaf_'+k,JSON.stringify(v));
+    }catch(err){
+      console.warn('Analytics storage write failed for key:',k,err);
+    }
+  },
   inc(k){this.s(k,(this.g(k,0)+1))},
   push(k,v,max=20){const a=this.g(k,[]);a.unshift(v);this.s(k,a.slice(0,max))},
   today(){return new Date().toISOString().slice(0,10)},
@@ -570,6 +576,11 @@ function isBookmarked(orgName) {
   return saved.includes(orgName);
 }
 
+function renderGfiBadge(gh){
+  if(gh?.gfi===null||gh?.gfi===undefined)return '';
+  return `<span class="gh-s">🟢 <b>${fmt(gh.gfi)} GFI</b></span>`;
+}
+
 function renderGrid(orgs){
   const g=document.getElementById('orgGrid');
   if(!orgs.length){g.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><h3>No matches found</h3><p>Try removing some filters.</p></div>`;return}
@@ -579,7 +590,7 @@ function renderGrid(orgs){
     const ghm=o._gh?`<div class="gh-mini">
       <span class="gh-s">⭐ <b>${fmt(o._gh.stars)}</b></span>
       <span class="gh-s">🍴 <b>${fmt(o._gh.forks)}</b></span>
-      ${o._gh.gfi!==null&&o._gh.gfi!==undefined?`<span class="gh-s">🟢 <b>${fmt(o._gh.gfi)} GFI</b></span>`:''}
+      ${renderGfiBadge(o._gh)}
       <span class="gh-s">🕐 <b>${o._gh.lastCommit}</b></span>
     </div>`:'';
     const globalIdx=ORGS.indexOf(o);
@@ -795,7 +806,7 @@ function openModal(idx){
   document.getElementById('modalBg').classList.add('open');
   document.body.style.overflow='hidden';
   // Fetch GFI lazily on modal open
-  if(o.github&&(!o._gh||o._gh.gfi===null||o._gh.gfi===undefined)){
+  if(o.github&&(o._gh?.gfi===null||o._gh?.gfi===undefined)){
     document.getElementById('ghGFI').textContent='…';
     fetchGFI(o.github).then(gfi=>{
       if(gfi!==null){
@@ -892,7 +903,9 @@ async function fetchAllIssues(){
           if(!o._gh)o._gh={};
           o._gh.gfi=gfiCount;
         }
-      }catch(_err){/* ignore fetch/parse errors for unavailable repos */}
+      }catch(err){
+        console.warn('Failed fetching GFI issues for org:',o.github,err);
+      }
       done++;
     }));
     // Update progress UI
