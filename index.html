@@ -383,55 +383,52 @@
         <p class="text-xs text-green-600">Updated every 6 hours via GitHub Actions — no API rate limits for visitors.</p>
       </div>
     </div>
-    <span class="text-xs font-mono text-green-600 ml-auto">Last updated: 2 hours ago</span>
+    <span id="issuesLastUpdated" class="text-xs font-mono text-green-600 ml-auto">Last updated: pending refresh</span>
   </div>
   <!-- Issue Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/rust-lang/rust/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
-        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Fix type inference for generic functions</h4>
+        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Browse open Good First Issues</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
       </div>
       <p class="text-xs text-zinc-500 mb-3 font-mono">rust-lang/rust</p>
       <div class="flex flex-wrap gap-1.5">
-        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">good first issue</span>
-        <span class="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-bold">help wanted</span>
-        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">3 comments</span>
+        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">GitHub search</span>
+        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">Label: good first issue</span>
       </div>
     </div>
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/django/django/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
-        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Add dark mode to settings page</h4>
+        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Browse open Good First Issues</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
       </div>
       <p class="text-xs text-zinc-500 mb-3 font-mono">django/django</p>
       <div class="flex flex-wrap gap-1.5">
-        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">good first issue</span>
-        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">1 comment</span>
+        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">GitHub search</span>
+        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">Label: good first issue</span>
       </div>
     </div>
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/tensorflow/tensorflow/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
-        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Improve error messages for CUDA compilation</h4>
+        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Browse open Good First Issues</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
       </div>
       <p class="text-xs text-zinc-500 mb-3 font-mono">tensorflow/tensorflow</p>
       <div class="flex flex-wrap gap-1.5">
-        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">good first issue</span>
-        <span class="text-[10px] px-2 py-0.5 bg-purple-100 text-purple-700 rounded font-bold">documentation</span>
-        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">5 comments</span>
+        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">GitHub search</span>
+        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">Label: good first issue</span>
       </div>
     </div>
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/kubernetes/kubernetes/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
-        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Add unit tests for API client module</h4>
+        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Browse open Good First Issues</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
       </div>
       <p class="text-xs text-zinc-500 mb-3 font-mono">kubernetes/kubernetes</p>
       <div class="flex flex-wrap gap-1.5">
-        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">good first issue</span>
-        <span class="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded font-bold">testing</span>
-        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">0 comments</span>
+        <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">GitHub search</span>
+        <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">Label: good first issue</span>
       </div>
     </div>
   </div>
@@ -872,6 +869,43 @@
     });
   });
 
+  function buildGfiSearchUrl(github) {
+    const query = github.includes('/')
+      ? `repo:${github} is:issue is:open label:\"good first issue\"`
+      : `user:${github} is:issue is:open label:\"good first issue\"`;
+    return `https://github.com/issues?q=${encodeURIComponent(query)}`;
+  }
+
+  function renderFallbackOrgSearchCards(container) {
+    const orgsWithGithub = ORGS.filter(o => typeof o.github === 'string' && o.github.trim());
+    container.innerHTML = '';
+
+    const notice = document.createElement('p');
+    notice.className = 'col-span-full text-sm text-zinc-500';
+    notice.textContent = 'Live pre-fetched issues are still syncing. Browse open Good First Issues for all organizations below.';
+    container.appendChild(notice);
+
+    orgsWithGithub.forEach(org => {
+      const card = document.createElement('a');
+      card.href = buildGfiSearchUrl(org.github.trim());
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.className = 'bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer block';
+      card.innerHTML = `
+        <div class="flex items-start justify-between mb-3">
+          <h4 class="font-bold text-sm group-hover:text-primary transition-colors line-clamp-1">Browse open Good First Issues</h4>
+          <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
+        </div>
+        <p class="text-xs text-zinc-500 mb-3 font-mono">${org.github}</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">${org.name}</span>
+          <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">Label: good first issue</span>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
   // Dynamic GFIs
   async function renderGoodFirstIssues() {
     try {
@@ -879,9 +913,25 @@
       const data = await res.json();
       const container = document.querySelector('#issues .grid');
       if (!container) return;
+      const issues = Array.isArray(data.issues) ? data.issues : [];
+      const lastUpdatedEl = document.getElementById('issuesLastUpdated');
+      if (lastUpdatedEl) {
+        if (data.updated_at) {
+          const mins = Math.max(1, Math.floor((Date.now() - new Date(data.updated_at).getTime()) / 60000));
+          const relative = mins < 60 ? `${mins} min ago` : `${Math.floor(mins / 60)} hours ago`;
+          lastUpdatedEl.textContent = `Last updated: ${relative}`;
+        } else {
+          lastUpdatedEl.textContent = 'Last updated: unavailable';
+        }
+      }
+
+      if (!issues.length) {
+        renderFallbackOrgSearchCards(container);
+        return;
+      }
+
       container.innerHTML = '';
-      
-      data.issues.slice(0, 6).forEach(issue => {
+      issues.slice(0, 6).forEach(issue => {
         const card = document.createElement('div');
         card.className = 'bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer';
         card.onclick = () => window.open(issue.url, '_blank');
