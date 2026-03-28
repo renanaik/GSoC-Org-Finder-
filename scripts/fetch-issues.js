@@ -12,32 +12,50 @@ const ORGS = [
 
 async function fetchIssues() {
   const results = [];
+  const seenIssueUrls = new Set();
 
   for (const org of ORGS) {
     try {
+      const headers = {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'gsoc-org-finder-actions'
+      };
+
+      if (process.env.GITHUB_TOKEN) {
+        headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+      }
+
+      const query = encodeURIComponent(`org:${org} is:issue label:"good first issue" state:open archived:false`);
       const res = await fetch(
-        `https://api.github.com/search/issues?q=label:"good first issue"+org:${org}+state:open&per_page=10&sort=created`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.GITHUB_TOKEN || ''}`,
-            Accept: 'application/vnd.github+json'
-          }
-        }
+        `https://api.github.com/search/issues?q=${query}&per_page=30&sort=updated&order=desc`,
+        { headers }
       );
+
+      if (!res.ok) {
+        const errorBody = await res.text();
+        throw new Error(`GitHub API ${res.status}: ${errorBody.slice(0, 200)}`);
+      }
 
       const data = await res.json();
 
       if (Array.isArray(data.items)) {
-        results.push(...data.items.map((issue) => ({
-          org,
-          title: issue.title,
-          url: issue.html_url,
-          repo: issue.repository_url.split('/').slice(-2).join('/'),
-          labels: issue.labels.map((l) => l.name),
-          comments: issue.comments,
-          created_at: issue.created_at,
-          language: null
-        })));
+        const freshOpenIssues = data.items
+          .filter((issue) => issue.state === 'open' && !seenIssueUrls.has(issue.html_url))
+          .slice(0, 10)
+          .map((issue) => ({
+            org,
+            title: issue.title,
+            url: issue.html_url,
+            repo: issue.repository_url.split('/').slice(-2).join('/'),
+            labels: issue.labels.map((l) => l.name),
+            comments: issue.comments,
+            created_at: issue.created_at,
+            updated_at: issue.updated_at,
+            language: null
+          }));
+
+        freshOpenIssues.forEach((issue) => seenIssueUrls.add(issue.url));
+        results.push(...freshOpenIssues);
       }
 
       await new Promise((r) => setTimeout(r, 300));
