@@ -869,19 +869,40 @@
     });
   });
 
-  function wireFallbackIssueCards() {
-    document.querySelectorAll('.issue-fallback-card').forEach(card => {
-      const url = card.dataset.url;
-      if (!url) return;
-      card.onclick = () => window.open(url, '_blank', 'noopener,noreferrer');
-      card.setAttribute('role', 'link');
-      card.setAttribute('tabindex', '0');
-      card.onkeydown = (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          window.open(url, '_blank', 'noopener,noreferrer');
-        }
-      };
+  function buildGfiSearchUrl(github) {
+    const query = github.includes('/')
+      ? `repo:${github} is:issue is:open label:\"good first issue\"`
+      : `user:${github} is:issue is:open label:\"good first issue\"`;
+    return `https://github.com/issues?q=${encodeURIComponent(query)}`;
+  }
+
+  function renderFallbackOrgSearchCards(container) {
+    const orgsWithGithub = ORGS.filter(o => typeof o.github === 'string' && o.github.trim());
+    container.innerHTML = '';
+
+    const notice = document.createElement('p');
+    notice.className = 'col-span-full text-sm text-zinc-500';
+    notice.textContent = 'Live pre-fetched issues are still syncing. Browse open Good First Issues for all organizations below.';
+    container.appendChild(notice);
+
+    orgsWithGithub.forEach(org => {
+      const card = document.createElement('a');
+      card.href = buildGfiSearchUrl(org.github.trim());
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.className = 'bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer block';
+      card.innerHTML = `
+        <div class="flex items-start justify-between mb-3">
+          <h4 class="font-bold text-sm group-hover:text-primary transition-colors line-clamp-1">Browse open Good First Issues</h4>
+          <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
+        </div>
+        <p class="text-xs text-zinc-500 mb-3 font-mono">${org.github}</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded font-bold">${org.name}</span>
+          <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">Label: good first issue</span>
+        </div>
+      `;
+      container.appendChild(card);
     });
   }
 
@@ -904,13 +925,8 @@
         }
       }
 
-      // Keep static fallback cards if pre-fetched data is empty.
       if (!issues.length) {
-        const fallback = document.createElement('p');
-        fallback.className = 'col-span-full text-sm text-zinc-500';
-        fallback.textContent = 'Live pre-fetched issues are still syncing. Showing fallback examples below.';
-        container.prepend(fallback);
-        wireFallbackIssueCards();
+        renderFallbackOrgSearchCards(container);
         return;
       }
 
@@ -980,7 +996,6 @@
   setInterval(updateCountdown, 60000);
   renderOrgs();
   renderWatchlist();
-  wireFallbackIssueCards();
   renderGoodFirstIssues();
   renderCompare();
 </script>
