@@ -387,7 +387,7 @@
   </div>
   <!-- Issue Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/rust-lang/rust/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
         <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Fix type inference for generic functions</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
@@ -399,7 +399,7 @@
         <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">3 comments</span>
       </div>
     </div>
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/django/django/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
         <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Add dark mode to settings page</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
@@ -410,7 +410,7 @@
         <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">1 comment</span>
       </div>
     </div>
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/tensorflow/tensorflow/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
         <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Improve error messages for CUDA compilation</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
@@ -422,7 +422,7 @@
         <span class="text-[10px] px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded">5 comments</span>
       </div>
     </div>
-    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group">
+    <div class="bg-white rounded-xl p-5 border border-zinc-100 hover:shadow-lg transition-all group cursor-pointer issue-fallback-card" data-url="https://github.com/kubernetes/kubernetes/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
       <div class="flex items-start justify-between mb-3">
         <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Add unit tests for API client module</h4>
         <span class="material-symbols-outlined text-zinc-300 group-hover:text-primary text-lg">open_in_new</span>
@@ -872,6 +872,22 @@
     });
   });
 
+  function wireFallbackIssueCards() {
+    document.querySelectorAll('.issue-fallback-card').forEach(card => {
+      const url = card.dataset.url;
+      if (!url) return;
+      card.onclick = () => window.open(url, '_blank', 'noopener,noreferrer');
+      card.setAttribute('role', 'link');
+      card.setAttribute('tabindex', '0');
+      card.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      };
+    });
+  }
+
   // Dynamic GFIs
   async function renderGoodFirstIssues() {
     try {
@@ -897,6 +913,7 @@
         fallback.className = 'col-span-full text-sm text-zinc-500';
         fallback.textContent = 'Live pre-fetched issues are still syncing. Showing fallback examples below.';
         container.prepend(fallback);
+        wireFallbackIssueCards();
         return;
       }
 
@@ -966,6 +983,7 @@
   setInterval(updateCountdown, 60000);
   renderOrgs();
   renderWatchlist();
+  wireFallbackIssueCards();
   renderGoodFirstIssues();
   renderCompare();
 </script>
