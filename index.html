@@ -167,10 +167,38 @@
     .dark body { background: #0f0f10; color: #e5e7eb; }
     .dark .glass { background: rgba(24, 24, 27, 0.85); }
     .dark .bg-white { background: #18181b !important; }
+    .dark .bg-surface-container-low { background: #27272a !important; color: #d4d4d8 !important; }
     .dark .text-zinc-900 { color: #f4f4f5 !important; }
     .dark .text-zinc-600, .dark .text-zinc-500, .dark .text-zinc-400 { color: #a1a1aa !important; }
+    .dark .text-zinc-300 { color: #71717a !important; }
+    .dark .text-on-surface { color: #f4f4f5 !important; }
+    .dark .text-on-surface-variant { color: #a1a1aa !important; }
     .dark .border-zinc-100 { border-color: #3f3f46 !important; }
+    .dark .border-zinc-200 { border-color: #3f3f46 !important; }
     .dark .hover\:bg-zinc-100\/50:hover { background: rgba(63, 63, 70, 0.45) !important; }
+    
+    /* Dark mode - Card hover effects */
+    .dark .group:hover { background: #1f1f23 !important; border-color: rgba(249, 115, 22, 0.3) !important; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important; }
+    .dark .group:hover .text-on-surface { color: #f97316 !important; }
+    .dark .group-hover\:text-primary:hover, .dark .group:hover .group-hover\:text-primary { color: #f97316 !important; }
+    
+    /* Dark mode - Tech tags */
+    .dark .tech-tag { background: #27272a; color: #d4d4d8; border-color: #3f3f46; }
+    .dark .fit-tag { background: #1e293b; color: #93c5fd; border-color: #334155; }
+    
+    /* Dark mode - Modal */
+    .dark .modal { background: #18181b; }
+    .dark .modal-header h2 { color: #f4f4f5; }
+    .dark .modal-header p { color: #a1a1aa; }
+    .dark .section-title { color: #71717a; border-color: #27272a; }
+    .dark .metric-card { background: #27272a; border-color: #3f3f46; }
+    .dark .metric-value { color: #f4f4f5; }
+    .dark .metric-label { color: #a1a1aa; }
+    .dark .close-btn { background: #27272a; color: #a1a1aa; }
+    .dark .close-btn:hover { background: #3f3f46; color: #f4f4f5; }
+    .dark .modal-footer { background: #0f0f10; border-color: #27272a; }
+    .dark .modal-repo-link { background: #27272a; color: #e5e7eb; border-color: #3f3f46; }
+    .dark .modal-repo-link:hover { background: #3f3f46; }
   </style>
 </head>
 <body class="bg-background text-on-surface font-body antialiased">
