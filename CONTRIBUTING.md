@@ -138,14 +138,14 @@ If unsure:
 - Open an issue
 - Ask in the discussion thread
 
-- #  Contributing Guide
+- ## Getting Started
 
 Thank you for your interest in contributing! 🎉  
 This guide will help you get started quickly.
 
 ---
 
-##  Setup Instructions
+## Setup Instructions
 
 ### 1. Fork & Clone
 
