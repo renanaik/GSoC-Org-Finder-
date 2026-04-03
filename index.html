@@ -10,6 +10,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script>
+    // Theme restoration - runs early to prevent FOUC
+    (function(){
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <script>
     tailwind.config = {
       darkMode: "class",
       theme: {
@@ -279,7 +289,7 @@
   <div class="flex items-center justify-between px-4 sm:px-6 py-3 max-w-7xl mx-auto w-full">
     <div class="flex items-center gap-3 sm:gap-4 md:gap-8">
       <!-- Hamburger menu button (mobile only) -->
-      <button id="menuBtn" onclick="toggleMenu()" class="inline-flex md:hidden shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-lg transition-colors" aria-label="Menu">
+      <button id="menuBtn" onclick="toggleMenu()" class="inline-flex md:hidden shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-lg transition-colors" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
         <span class="material-symbols-outlined text-zinc-600">menu</span>
       </button>
       
@@ -300,7 +310,7 @@
     
     <!-- Right side: Toggle visible on all screens, GitHub button hidden on mobile -->
     <div class="flex items-center gap-2 sm:gap-3">
-      <button id="themeToggleBtn" onclick="toggleTheme()" class="inline-flex shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-full transition-colors" aria-label="Toggle theme">
+      <button id="themeToggleBtn" onclick="toggleTheme()" class="inline-flex shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-full transition-colors" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme">
         <span class="material-symbols-outlined text-zinc-600">dark_mode</span>
       </button>
       <a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-" target="_blank" class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
@@ -311,7 +321,7 @@
 </header>
 
 <!-- Mobile Menu Overlay -->
-<div id="mobileMenu" class="fixed inset-0 z-40 hidden">
+<div id="mobileMenu" class="fixed inset-0 z-40 hidden" role="dialog" aria-modal="true" aria-label="Navigation menu">
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="toggleMenu()"></div>
   
@@ -820,10 +830,14 @@
   };
 
   function updateThemeIcon(){
-    const icon = document.querySelector('#themeToggleBtn .material-symbols-outlined');
+    const btn = document.getElementById('themeToggleBtn');
+    const icon = btn ? btn.querySelector('.material-symbols-outlined') : null;
     if(icon){
       const isDark = document.documentElement.classList.contains('dark');
       icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+      btn.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+      btn.setAttribute('title', isDark ? 'Switch to light theme' : 'Switch to dark theme');
     }
   }
 
@@ -833,21 +847,37 @@
   window.toggleMenu = function(){
     const menu = document.getElementById('mobileMenu');
     const panel = document.getElementById('menuPanel');
+    const menuBtn = document.getElementById('menuBtn');
     
     if(menu.classList.contains('hidden')){
       // Open menu
       menu.classList.remove('hidden');
+      menuBtn.setAttribute('aria-expanded', 'true');
+      menuBtn.setAttribute('aria-label', 'Close menu');
       setTimeout(() => {
         panel.style.transform = 'translateX(0)';
       }, 10);
+      document.addEventListener('keydown', handleMenuEscape);
     } else {
       // Close menu
       panel.style.transform = 'translateX(-100%)';
+      menuBtn.setAttribute('aria-expanded', 'false');
+      menuBtn.setAttribute('aria-label', 'Open menu');
+      document.removeEventListener('keydown', handleMenuEscape);
       setTimeout(() => {
         menu.classList.add('hidden');
       }, 300);
     }
   };
+  
+  function handleMenuEscape(e){
+    if(e.key === 'Escape'){
+      const menu = document.getElementById('mobileMenu');
+      if(!menu.classList.contains('hidden')){
+        toggleMenu();
+      }
+    }
+  }
 
   // Set active menu item and update UI
   window.setActiveMenu = function(clickedLink){
