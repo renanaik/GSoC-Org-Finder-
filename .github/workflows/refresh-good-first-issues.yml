@@ -21,7 +21,7 @@ jobs:
           node-version: '22'
 
       - name: Fetch issues
-        run: node scripts/fetch-issues.js
+        run: node agent/scripts/fetch-issues.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
