@@ -2,15 +2,15 @@
 /**
  * URL Validation Script for GSoC Org Finder
  * 
- * Validates all organization ideas URLs in org.js to ensure:
+ * Validates all organization ideas URLs in src/js/org.js to ensure:
  * - URLs are properly formatted
  * - URLs use http or https protocols only
  * - No malicious or suspicious URLs are present
  * 
- * Usage: node validate-ideas-urls.js
+ * Usage: node agent/scripts/validate-ideas-urls.js
  */
 
-const ORGS = require('./org.js');
+const ORGS = require('../../src/js/org.js');
 
 console.log('Validating Ideas URLs for GSoC Organizations\n');
 console.log('═'.repeat(60));

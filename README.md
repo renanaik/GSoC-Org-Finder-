@@ -113,13 +113,17 @@ No sign-up. No install. No build step. Just open and explore.
 
 ```
 gsoc-2026-org-finder/
-├── index.html                # Main frontend HTML
-├── app.js                    # Application logic & data
-├── styles.css                # Styling
-├── org.js                    # Organization data
-├── validate-ideas-urls.js    # URL validation script for org data
-├── api/
-│   └── github.js             # Vercel Edge Function — GitHub API proxy
+├── index.html                    # Main frontend HTML
+├── api/github.js                 # Vercel Edge Function — GitHub API proxy
+├── src/
+│   ├── assets/og-image.jpeg      # Social preview image
+│   ├── js/app.js                 # Application logic
+│   ├── js/org.js                 # Organization data source
+│   └── styles.css                # Styling
+├── agent/
+│   ├── scripts/                  # Automation and helper scripts
+│   └── tenet_agent/              # TENET PR review agent
+├── data/issues.json
 └── README.md
 ```
 
@@ -132,7 +136,7 @@ No `node_modules`. No build step. No bundler. Just deploy.
 The project includes a validation script to ensure all organization ideas URLs are safe and properly formatted:
 
 ```bash
-node validate-ideas-urls.js
+node agent/scripts/validate-ideas-urls.js
 ```
 
 This script checks:
@@ -141,7 +145,7 @@ This script checks:
 - ⚠️ Placeholder/generic URLs that need updating
 - 📊 Summary statistics and protocol distribution
 
-Run this before committing changes to `org.js` to catch invalid URLs early.
+Run this before committing changes to `src/js/org.js` to catch invalid URLs early.
 
 ---
 
@@ -203,7 +207,7 @@ Each org entry looks like this:
 - Must use `http://` or `https://` protocol (or protocol will be added automatically)
 - Should link to the organization's specific project ideas page
 - Generic GSoC organization pages are acceptable as placeholders but should be updated when possible
-- Run `node validate-ideas-urls.js` to check all URLs before submitting
+- Run `node agent/scripts/validate-ideas-urls.js` to check all URLs before submitting
 
 **Competition levels** (subjective, based on org popularity + slot count):
 - `hot` — high applicant volume, very competitive (Django, LLVM, Git, KDE…)

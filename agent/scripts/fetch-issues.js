@@ -1,5 +1,5 @@
 const fs = require('fs');
-const ORGS = require('../org.js');
+const ORGS = require('../../src/js/org.js');
 
 const SEARCH_DELAY_MS = 2200; // Stay under search API secondary limits.
 const MAX_ISSUES_PER_ORG = 3;
