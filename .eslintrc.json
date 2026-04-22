@@ -30,7 +30,7 @@
     "overrides": [
         {
             "files": [
-                "src/api/*.js"
+                "api/*.js"
             ],
             "parserOptions": {
                 "sourceType": "module"

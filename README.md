@@ -103,7 +103,7 @@ No sign-up. No install. No build step. Just open and explore.
 |---|---|
 | Frontend | Vanilla HTML/CSS/JS — zero frameworks, zero build step |
 | Hosting | Vercel (static) |
-| API | Vercel Edge Function (`/src/api/github.js`) |
+| API | Vercel Edge Function (`/api/github.js`) |
 | Data source | Manually curated from [summerofcode.withgoogle.com](https://summerofcode.withgoogle.com/programs/2026/organizations) |
 | Analytics | Browser `localStorage` only — no external tracking |
 
@@ -114,8 +114,8 @@ No sign-up. No install. No build step. Just open and explore.
 ```
 gsoc-2026-org-finder/
 ├── index.html                    # Main frontend HTML
+├── api/github.js                 # Vercel Edge Function — GitHub API proxy
 ├── src/
-│   ├── api/github.js             # Vercel Edge Function — GitHub API proxy
 │   ├── assets/og-image.jpeg      # Social preview image
 │   ├── js/app.js                 # Application logic
 │   ├── js/org.js                 # Organization data source
@@ -228,7 +228,7 @@ Each org entry looks like this:
 
 ---
 
-## 🔌 API Reference (`/src/api/github.js`)
+## 🔌 API Reference (`/api/github.js`)
 
 The Edge Function proxies GitHub API calls so your token never hits the client.
 

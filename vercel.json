@@ -1,7 +1,7 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/github", "destination": "/src/api/github.js" }
+    { "source": "/api/github", "destination": "/api/github.js" }
   ],
   "headers": [
     {
