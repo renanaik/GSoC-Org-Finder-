@@ -310,7 +310,7 @@
     .dark header .hover\:text-zinc-900:hover { color: #f4f4f5 !important; }
     .dark header .hover\:bg-zinc-100\/50:hover { background: rgba(39, 39, 42, 0.5) !important; }
   </style>
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#F46B0E" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -1442,7 +1442,7 @@ if(org.ideas){
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
     });
   }
 </script>
