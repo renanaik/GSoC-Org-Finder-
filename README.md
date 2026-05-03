@@ -241,11 +241,11 @@ The Edge Function proxies GitHub API calls so your token never hits the client.
 All responses are cached in-memory for **1 hour** on the Edge runtime.
 
 ---
-# We thank all our Contributors in improving this project
+## We thank all our Contributors for improving this project
 ## Contributors ✨
-
-<!-- ALL-CONTRIBUTORS-LIST:START -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+<a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=S3DFX-CYBER/GSoC-Org-Finder-" />
+</a>
 
 ## 📄 License
 
