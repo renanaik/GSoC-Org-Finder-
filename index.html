@@ -261,7 +261,9 @@
       border-color: #f97316 !important; 
       color: #f97316 !important; 
     }
-    .dark .pill.active {
+    /* Higher-specificity rule beats .dark section .flex.flex-wrap.gap-2 > button:not(.filter-chip) (0,5,2) */
+    .dark .pill.active,
+    .dark section .flex.flex-wrap.gap-2 > button.pill.active {
       background: rgba(251, 146, 60, 0.2) !important;
       border-color: #fb923c !important;
       color: #fb923c !important;
@@ -1073,6 +1075,7 @@
   const bookmarkedSet = new Set(JSON.parse(localStorage.getItem('bookmarks') || '[]'));
   const selectedLanguages = new Set();
   let matchAllLanguages = false;
+  let activeChip = null; // tracks the active quick-filter chip key ('veterans' | 'newcomers' | 'low-competition' | 'high-competition' | 'bookmarked' | 'active' | null)
   const LANGUAGE_ALIASES = {
     'python': ['python'],
     'javascript': ['javascript', 'js'],
@@ -1099,7 +1102,15 @@
   function languageMatchesSelection(tags, lang) {
     const langKey = lang.toLowerCase();
     const aliases = LANGUAGE_ALIASES[langKey] || [langKey];
-    return aliases.some(alias => tags.some(tag => tag.toLowerCase().includes(alias.toLowerCase())));
+    // Use exact token matching to prevent false positives like "Go" matching "django"
+    // Tags are split on whitespace, commas, slashes, and plus signs before comparing
+    return aliases.some(alias => {
+      const a = alias.toLowerCase();
+      return tags.some(tag => {
+        const tokens = tag.toLowerCase().split(/[\s,/+]+/);
+        return tokens.includes(a);
+      });
+    });
   }
 
   function clearSelectedLanguagePills() {
@@ -1152,12 +1163,8 @@
     applyFilters();
   }
 
-  window.toggleLanguageMode = function(el) {
-    matchAllLanguages = Boolean(el?.checked);
-    clearSelectedLanguagePills();
-    updateLanguageModeHint();
-    applyFilters();
-  };
+  // NOTE: toggleLanguageMode removed — the matchAllLanguagesToggle checkbox
+  // uses a direct event listener (line ~1538) and does not use onclick=.
 
   window.togglePill = function(el) {
     const langDisplay = el.dataset.lang || '';
@@ -1511,7 +1518,7 @@ if(org.ideas){
     document.body.style.overflow = 'auto';
   }
 
-  // Filters
+  // Filters — all conditions are additive (chip + language pills + search + dropdowns compose)
   function applyFilters() {
     const query = document.getElementById('searchInput').value.toLowerCase();
     const cat = document.getElementById('categoryFilter').value;
@@ -1526,7 +1533,17 @@ if(org.ideas){
         || (matchAllLanguages
           ? [...selectedLanguages].every(lang => languageMatchesSelection(tags, lang))
           : [...selectedLanguages].some(lang => languageMatchesSelection(tags, lang)));
-      return matchSearch && matchCat && matchComp && matchLang;
+
+      // Quick-filter chip — composes additively with all other filters
+      let matchChip = true;
+      if (activeChip === 'veterans')         matchChip = o.years >= 10;
+      else if (activeChip === 'newcomers')   matchChip = o.years <= 3;
+      else if (activeChip === 'low-competition')  matchChip = o.competition === 'chill';
+      else if (activeChip === 'high-competition') matchChip = o.competition === 'hot';
+      else if (activeChip === 'bookmarked')  matchChip = bookmarkedSet.has(o.name);
+      // 'active' chip requires live GitHub data not available in this version — pass through
+
+      return matchSearch && matchCat && matchComp && matchLang && matchChip;
     });
 
     renderOrgs(true);
@@ -1551,39 +1568,38 @@ if(org.ideas){
     applyFilters();
   });
 
-  // Category Chips Filter
+  // Quick-filter chips — mutually exclusive with each other, but additive with
+  // language pills, search, and dropdown filters. applyFilters() reads activeChip.
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const text = chip.textContent.trim().toLowerCase();
-      
-      // Reset others
+      const isCurrentlyActive = chip.classList.contains('bg-orange-600');
+
+      // Reset all chips to inactive state
       document.querySelectorAll('.filter-chip').forEach(c => {
-        if (c !== chip) {
-          c.classList.remove('bg-orange-600', 'text-white');
-          c.classList.add('bg-surface-container-highest');
-        }
+        c.classList.remove('bg-orange-600', 'text-white');
+        c.classList.add('bg-surface-container-highest');
       });
 
-      const isActive = chip.classList.toggle('bg-orange-600');
-      chip.classList.toggle('text-white');
-      chip.classList.toggle('bg-surface-container-highest');
+      if (!isCurrentlyActive) {
+        // Activate the clicked chip
+        chip.classList.add('bg-orange-600', 'text-white');
+        chip.classList.remove('bg-surface-container-highest');
 
-      if (!isActive) {
-        filteredOrgs = [...ORGS];
+        // Map chip text → activeChip key used by applyFilters()
+        if (text.includes('bookmarked'))         activeChip = 'bookmarked';
+        else if (text.includes('veteran'))       activeChip = 'veterans';
+        else if (text.includes('newcomer'))      activeChip = 'newcomers';
+        else if (text.includes('low competition'))  activeChip = 'low-competition';
+        else if (text.includes('high competition')) activeChip = 'high-competition';
+        else if (text.includes('actively'))      activeChip = 'active';
+        else                                     activeChip = null;
       } else {
-        if (text.includes("bookmarked")) {
-          filteredOrgs = ORGS.filter(o => bookmarkedSet.has(o.name));
-        } else if (text.includes("veterans")) {
-          filteredOrgs = ORGS.filter(o => o.years >= 10);
-        } else if (text.includes("newcomers")) {
-          filteredOrgs = ORGS.filter(o => o.years <= 3);
-        } else if (text.includes("low competition")) {
-          filteredOrgs = ORGS.filter(o => o.competition === "chill");
-        } else if (text.includes("high competition")) {
-          filteredOrgs = ORGS.filter(o => o.competition === "high");
-        }
+        // Chip was active — clicking again deactivates it
+        activeChip = null;
       }
-      renderOrgs(true);
+
+      applyFilters();
     });
   });
 
@@ -1712,6 +1728,7 @@ if(org.ideas){
 
   // Initialize
   updateLanguageModeHint();
+  renderTimeline();        // populate #timeline-milestones on first load
   updateCountdown();
   setInterval(updateCountdown, 60000);
   renderSelectedLanguages();
