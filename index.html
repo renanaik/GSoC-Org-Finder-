@@ -299,6 +299,10 @@
     .dark .modal-footer { background: #0f0f10; border-color: #27272a; }
     .dark .modal-repo-link { background: #27272a; color: #e5e7eb; border-color: #3f3f46; }
     .dark .modal-repo-link:hover { background: #3f3f46; }
+    .dark #compareModalBody { color: #e5e7eb; }
+    .dark #compareModalBody .text-zinc-700 { color: #e5e7eb !important; }
+    .dark #compareModalBody .text-zinc-500 { color: #a1a1aa !important; }
+    .dark #compareModalBody .text-zinc-400 { color: #d4d4d8 !important; }
 
     /* Dark mode - Guide section cards */
     .dark #guide article { background: #18181b !important; border-color: #3f3f46 !important; }
@@ -1427,6 +1431,84 @@
       container.appendChild(empty);
     }
   }
+
+  function renderCompareModal() {
+    const body = document.getElementById('compareModalBody');
+    if (!body) return;
+    const escapeHtml = (value) => String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+
+    const selectedOrgs = compareList.map(name => ORGS.find(o => o.name === name)).filter(Boolean);
+    if (selectedOrgs.length < 2) {
+      body.innerHTML = `
+        <div class="py-12 text-center border-2 border-dashed border-zinc-200 rounded-2xl">
+          <span class="material-symbols-outlined text-4xl text-zinc-300 mb-3">compare_arrows</span>
+          <p class="font-bold text-zinc-700">Select at least 2 organizations to compare.</p>
+          <p class="text-sm text-zinc-500 mt-2">Use the Compare button on organization cards, then open this tool again.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const rows = [
+      ['Category', org => org.cat],
+      ['GSoC Years', org => org.years],
+      ['First Year', org => org.firstYear],
+      ['Competition', org => org.competition],
+      ['Codebase', org => org.codebase],
+      ['Tech Stack', org => org.tags.join(', ')],
+      ['Best Fit', org => org.fit.join(', ')],
+      ['Repository', org => org.github],
+    ];
+
+    body.innerHTML = `
+      <table class="w-full min-w-[720px] text-sm">
+        <thead>
+          <tr class="border-b border-zinc-200">
+            <th class="text-left py-3 px-4 text-xs uppercase tracking-widest text-zinc-400">Metric</th>
+            ${selectedOrgs.map(org => `<th class="text-left py-3 px-4 font-bold">${escapeHtml(org.name)}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(([label, getValue]) => `
+            <tr class="border-b border-zinc-100 last:border-0">
+              <td class="py-3 px-4 font-bold text-zinc-500">${label}</td>
+              ${selectedOrgs.map(org => `<td class="py-3 px-4 text-zinc-700">${escapeHtml(getValue(org))}</td>`).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function openCompareModal() {
+    renderCompare();
+    renderCompareModal();
+    document.getElementById('compareModal')?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCompareModal() {
+    document.getElementById('compareModal')?.classList.remove('open');
+    document.body.style.overflow = 'auto';
+  }
+
+  document.getElementById('compareModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'compareModal') closeCompareModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('compareModal')?.classList.contains('open')) {
+      closeCompareModal();
+    } else if (document.getElementById('orgModal')?.classList.contains('open')) {
+      closeModal();
+    }
+  });
 
   function toggleBookmark(e, name) {
     if (e) e.stopPropagation();
