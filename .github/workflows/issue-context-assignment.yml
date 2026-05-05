@@ -39,7 +39,7 @@ jobs:
 
             for (const route of (config.routes || [])) {
               const keywords = (route.keywords || []).map(k => String(k).toLowerCase());
-              const hit = keywords.some(k => text.includes(k));
+              const hit = keywords.some(k => new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(text));
               if (hit) {
                 matchedRoutes.push(route.name || 'unnamed-route');
                 for (const a of (route.assignees || [])) {
