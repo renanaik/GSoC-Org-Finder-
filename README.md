@@ -4,11 +4,11 @@
 <img width="1896" height="800" alt="image" src="https://github.com/user-attachments/assets/414e4b55-ec50-4290-97a6-678f23e7c96e" />
 
 **Live site → [https://findmygsoc.vercel.app/](https://findmygsoc.vercel.app/)**
----
+
 Join our Channel for community related questions and feedbacks 
 **Discord → [https://discord.gg/mgWV3xSV7](https://discord.gg/mgWV3xSV7)**
 
-
+---
 
 ## ✨ What is this?
 
@@ -18,49 +18,81 @@ No sign-up. No install. No build step. Just open and explore.
 
 ---
 
+## 📖 Table of Contents
+- [What is this?](#-what-is-this)
+- [Features](#-features)
+- [Flowchart](#-flowchart)
+- [Project Structure](#-project-structure)
+- [URL Validation](#-url-validation)
+- [Deploy Your Own](#-deploy-your-own)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [Key Dates](#-gsoc-2026-key-dates)
+- [Tips for Users](#-tips-for-users)
+- [License](#-license)
+
+---
+
+## 📈 Flowchart
+
+<img width="8192" height="1328" alt="User Action Flow for Org-2026-05-05-154517" src="https://github.com/user-attachments/assets/a56902d0-e172-42e9-b0d5-8a8ee2c7d156" />
+
+---
+
 ## 🎯 Features
 
+### Features at a glance
+| Feature | Details |
+|---------|---------|
+| 🔍 Search | Full-text across 185 orgs |
+| 🏷️ Filters | 15+ domains, 30+ languages |
+| ⚖️ Compare | Up to 3 organizations side-by-side |
+| 🟢 Good Issues | Browse beginner-friendly issues |
+| ⌨️ Keyboard Nav | Full accessibility support |
+| 🌙 Dark Mode | Fully themed |
+| 📱 Responsive | Mobile to desktop |
+
 ### 🔍 Discovery & Filtering
-- **Full-text search** by org name, technology, or topic
-- **Domain filter** — Science, Web, Security, AI, OS, Media, Infrastructure, and more
-- **Language filter** — Python, Rust, Go, C++, Java, JavaScript, Haskell, Julia, and more
-- **Multi-select language pills** — stack multiple languages for combined matching
-- **Quick chips** — one-tap filters for Veterans only, Newcomers, High/Low competition, Actively Maintained
-- **Sort by** — Alphabetical, Most Experienced, Newcomers First, Least Competitive, Most Stars, Good First Issues
+- 🔎 **Full-text search** by org name, technology, or topic
+- 🏷️ **Domain filter** — Science, Web, Security, AI, OS, Media, Infrastructure, and more
+- 💻 **Language filter** — Python, Rust, Go, C++, Java, JavaScript, Haskell, Julia, and more
+- 🎯 **Multi-select language pills** — stack multiple languages for combined matching
+- ⚡ **Quick chips** — one-tap filters for Veterans only, Newcomers, High/Low competition, Actively Maintained
+- 📊 **Sort by** — Alphabetical, Most Experienced, Newcomers First, Least Competitive, Most Stars, Good First Issues
 
 ### 📊 Live GitHub Data
-- **Live GitHub stats** — Stars, Forks, Open Issues, Last Commit — fetched via a serverless proxy
-- **Good First Issues count** — shown on every card and sortable, perfect for finding beginner-friendly orgs
-- **Activity badge** — Active / Moderate / Low based on last commit date
-- **Smart repo links** — single-project orgs link directly to their repo; umbrella orgs (Apache, OWASP, KDE…) link to their GitHub org page
+- 🌟 **Live GitHub stats** — Stars , Forks , Open Issues , Last Commit  — fetched via a serverless proxy 
+- 🟢 **Good First Issues count** — shown on every card and sortable, perfect for finding beginner-friendly orgs 
+- 🎖️ **Activity badge** — Active  / Moderate  / Low  based on last commit date
+- 🔗 **Smart repo links** — single-project orgs link directly to their repo ; umbrella orgs (Apache, OWASP, KDE…) link to their GitHub org page 
 
 ### 📋 Organization Detail Modal
-- Full description, tech stack tags, "Best Fit For" profiles
-- GSoC participation timeline (every year the org has participated)
-- Key metrics: years in GSoC, competition level, first year, Good First Issues count
-- **Project Ideas Link** — direct link to organization's ideas page (with security-hardened URL validation)
-- Fallback message when no ideas link is available
-- One-click add to comparison
+- 📖 Full description, tech stack tags,  "Best Fit For" profiles
+- 📅 GSoC participation timeline (every year the org has participated)
+- 📈 Key metrics: years in GSoC, competition level, first year, Good First Issues count
+- 💡 **Project Ideas Link** — direct link to organization's ideas page (with security-hardened 🔒 URL validation)
+- ⚠️ Fallback message when no ideas link is available
+- ➕ One-click add to comparison
 
 ### ⚖️ Comparison Mode
-- Select up to **3 organizations** side-by-side
-- Compares: category, GSoC years, competition, stars, forks, open issues, last commit, Good First Issues, languages
-- Green/red highlighting for best and worst values across each metric
+- 🏆 Select up to **3 organizations** side-by-side
+- 📊 Compares: category, GSoC years, competition, stars, forks, open issues, last commit, 🟢 Good First Issues, languages
+- 🟢 Green/🔴 red highlighting for best and worst values across each metric
 
 ### 🟢 Good First Issues Page
-- Dedicated full-screen page listing **Good First Issues from all 185 orgs**
-- Fetched live via the GitHub API proxy (uses your token, respects rate limits)
-- Filter by category, language, or free-text search
-- Each issue links directly to GitHub — sorted newest first
-- Shows org logo, issue title, labels, comment count, and relative date
+- 📄 Dedicated full-screen page listing **Good First Issues from all 185 orgs** 
+- ⚡ Fetched live via the GitHub API proxy (uses your token , respects rate limits )
+- 🔎 Filter by category , language , or free-text search 
+- 🔗 Each issue links directly to GitHub — sorted newest first 
+- 🖼️ Shows org logo, issue title, labels , comment count , and relative date 
 
 ### ⏱ Deadline Countdown
-- Live countdown banner to application open date (March 16, 2026)
-- Automatically switches to "Applications Closing In" during the open window (Mar 16 – Apr 8)
+- ⏰ Live countdown banner to application open date (March 16, 2026)
+- 🔄 Automatically switches to "Applications Closing In" during the open window (Mar 16 – Apr 8)
 
 ### 🔥 Trending Section
-- Shows the most-viewed organizations based on your own browsing history
-- Powered by localStorage analytics — zero data sent to any server
+- 📈 Shows the most-viewed organizations based on your own browsing history 👀
+- 💾 Powered by localStorage analytics — zero data sent to any server (100% private)
 
 ### ⌨️ Keyboard Navigation
 - `↑ ↓ ← →` — move focus between cards
@@ -151,8 +183,6 @@ This script checks:
 
 Run this before committing changes to `src/js/org.js` to catch invalid URLs early.
 
----
-
 ## 🚀 Deploy Your Own
 
 ### 1. Fork & Clone
@@ -179,6 +209,20 @@ Or connect the repo to Vercel and it deploys automatically on every push.
 open index.html   # macOS — works without API (GitHub stats won't load)
 ```
 For full functionality locally, run `vercel dev` to start the Edge Function.
+
+---
+
+## 🐛 Troubleshooting
+
+**GitHub stats not loading?**
+- Set `GITHUB_TOKEN` environment variable
+- Check rate limits: `curl -H "Authorization: token YOUR_TOKEN" https://api.github.com/rate_limit`
+
+**Ideas link not working?**
+- Run `node agent/scripts/validate-ideas-urls.js` to check all URLs
+
+**Issues page empty?**
+- GitHub API might be rate-limited; wait 1 hour and refresh
 
 ---
 
@@ -244,9 +288,17 @@ The Edge Function proxies GitHub API calls so your token never hits the client.
 
 All responses are cached in-memory for **1 hour** on the Edge runtime.
 
----
 ## We thank all our Contributors for improving this project
-## Contributors ✨
+
+## 💡 Tips for Users
+
+1. **New to GSoC?** Start with "Newcomers First" filter + sort by Good First Issues
+2. **Experienced?** Check "Veterans" filter + sort by Competition for challenges
+3. **Building a comparison?** Use keyboard shortcut `C` to quickly add orgs
+4. **Mobile browsing?** Try portrait mode — everything scrolls smoothly
+   
+## ✨ Contributors
+
 <a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=S3DFX-CYBER/GSoC-Org-Finder-" />
 </a>
@@ -254,5 +306,9 @@ All responses are cached in-memory for **1 hour** on the Edge runtime.
 ## 📄 License
 
 Apache 2.0 — made for GSoC beginners, by people who've been there.
-
 Share it with anyone applying! Applications open **March 16, 2026**. 🙌
+<center>
+  
+![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+</center>
