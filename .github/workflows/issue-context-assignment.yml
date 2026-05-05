@@ -72,7 +72,13 @@ jobs:
               return;
             }
 
+            try {
             await github.rest.issues.addAssignees({ owner, repo, issue_number, assignees: toAdd });
-
-            core.info(`Matched routes: ${matchedRoutes.length ? matchedRoutes.join(', ') : 'none (used default)'} `);
+            core.info(`Matched routes: ${matchedRoutes.length ? matchedRoutes.join(', ') : 'none (used default)'}`);
             core.info(`Assigned: ${toAdd.join(', ')}`);
+            } catch (err) {
+            core.warning('Failed to assign ${toAdd.join(', ')}: ${err.message}`);
+            }
+            
+
+            
