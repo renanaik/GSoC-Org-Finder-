@@ -299,11 +299,9 @@ All responses are cached in-memory for **1 hour** on the Edge runtime.
 4. **Mobile browsing?** Try portrait mode — everything scrolls smoothly
    
 ## ✨ Contributors
+<!-- CONTRIBUTORS_START -->
 
-<a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=S3DFX-CYBER/GSoC-Org-Finder-" alt="Contributors to GSoC Org Finder" />
-</a>
-
+<!-- CONTRIBUTORS_END -->
 ## 📄 License
 
 Apache 2.0 — made for GSoC beginners, by people who've been there.
