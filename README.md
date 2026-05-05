@@ -42,6 +42,7 @@ No sign-up. No install. No build step. Just open and explore.
 ## 🎯 Features
 
 ### Features at a glance
+
 | Feature | Details |
 |---------|---------|
 | 🔍 Search | Full-text across 185 orgs |
