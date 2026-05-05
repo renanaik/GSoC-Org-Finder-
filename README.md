@@ -300,7 +300,7 @@ All responses are cached in-memory for **1 hour** on the Edge runtime.
 ## ✨ Contributors
 
 <a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=S3DFX-CYBER/GSoC-Org-Finder-" />
+  <img src="https://contrib.rocks/image?repo=S3DFX-CYBER/GSoC-Org-Finder-" alt="Contributors to GSoC Org Finder" />
 </a>
 
 ## 📄 License
