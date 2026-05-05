@@ -5,7 +5,7 @@
 
 **Live site → [https://findmygsoc.vercel.app/](https://findmygsoc.vercel.app/)**
 
-Join our Channel for community related questions and feedbacks 
+Join our Channel for community-related questions and feedback
 **Discord → [https://discord.gg/mgWV3xSV7](https://discord.gg/mgWV3xSV7)**
 
 ---
