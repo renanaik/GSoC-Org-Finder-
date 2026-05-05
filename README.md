@@ -300,7 +300,6 @@ All responses are cached in-memory for **1 hour** on the Edge runtime.
    
 ## ✨ Contributors
 <!-- CONTRIBUTORS_START -->
-
 <!-- CONTRIBUTORS_END -->
 ## 📄 License
 
