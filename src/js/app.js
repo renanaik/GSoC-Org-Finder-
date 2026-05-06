@@ -555,6 +555,14 @@ function applyFilters(){
   renderGrid(res);
   document.getElementById('countDisplay').textContent=res.length;
   document.getElementById('filteredStat').textContent=res.length;
+
+  // Sync filter state to URL
+  const params = new URLSearchParams();
+  if (search)    params.set('q',search);
+  if (cat)    params.set('cat',cat);
+  if (lang)    params.set('lang',lang);
+  if (sort && sort !== 'alpha')    params.set('sort',sort);
+  history.replaceState(null,'',params.toString()?'?'+params.toString():location.pathname);
 }
 
 // Umbrella orgs: link goes to org page, not a single example repo
@@ -1152,6 +1160,11 @@ document.getElementById('matchAllLanguagesToggle')?.addEventListener('change', (
 });
 
 requestAnimationFrame(()=>{
+  const params = new URLSearchParams(location.search);
+  if (params.get('q'))    document.getElementById('searchInput').value = params.get('q');
+  if (params.get('cat'))    document.getElementById('catFilter').value = params.get('cat');
+  if (params.get('lang'))    document.getElementById('langFilter').value = params.get('lang');
+  if (params.get('sort'))    document.getElementById('sortSelect').value = params.get('sort');
   applyFilters();
   renderTrending();
   checkAPI();
