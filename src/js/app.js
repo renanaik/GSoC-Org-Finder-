@@ -560,7 +560,8 @@ function applyFilters(){
   const params = new URLSearchParams();
   if (search)    params.set('q',search);
   if (cat)    params.set('cat',cat);
-  if (lang)    params.set('lang',lang);
+  const selectedLangs = pills.size ? [...pills] : (lang ? [lang] : []);
+  if (selectedLangs.length)    params.set('lang', selectedLangs.join(','));
   if (sort && sort !== 'alpha')    params.set('sort',sort);
   history.replaceState(null,'',params.toString()?'?'+params.toString():location.pathname);
 }
@@ -1163,8 +1164,23 @@ requestAnimationFrame(()=>{
   const params = new URLSearchParams(location.search);
   if (params.get('q'))    document.getElementById('searchInput').value = params.get('q');
   if (params.get('cat'))    document.getElementById('catFilter').value = params.get('cat');
-  if (params.get('lang'))    document.getElementById('langFilter').value = params.get('lang');
-  if (params.get('sort'))    document.getElementById('sortSelect').value = params.get('sort');
+  const langParam = params.get('lang');
+  if (langParam) {
+    const langs = langParam.split(',').map(s => s.trim()).filter(Boolean);
+    if (langs.length > 1) {
+      pills.clear();
+      document.querySelectorAll('.pill').forEach(btn => {
+        const active = langs.includes(btn.dataset.lang);
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        if (active) pills.add(btn.dataset.lang);
+      });
+      document.getElementById('langFilter').value = '';
+      renderSelectedLanguages();
+    } else {
+      document.getElementById('langFilter').value = langs[0];
+    }
+  }
   applyFilters();
   renderTrending();
   checkAPI();
