@@ -851,6 +851,7 @@ let issuesFetching=false;
 function openIssuesPage(){
   document.getElementById('issuesPage').classList.add('open');
   document.body.style.overflow='hidden';
+  loadCachedIssues();
 }
 function closeIssuesPage(){
   document.getElementById('issuesPage').classList.remove('open');
@@ -938,6 +939,42 @@ async function fetchAllIssues(){
   filterIssues();
   renderGrid(filteredOrgs);
   updateStats();
+}
+
+async function loadCachedIssues(){
+  if(allIssues.length||issuesFetching) return;
+  try{
+    const res=await fetch('/data/issues.json');
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    if(!Array.isArray(data.issues)) return;
+
+    const orgByGithub=new Map(ORGS.map(o=>[o.github?.toLowerCase(),o]));
+    const orgByName=new Map(ORGS.map(o=>[o.name?.toLowerCase(),o]));
+
+    allIssues=data.issues.map(issue=>{
+      const key=issue.github?.toLowerCase()||issue.repo?.toLowerCase()||issue.org?.toLowerCase();
+      const orgMeta=orgByGithub.get(key)||orgByName.get(issue.org?.toLowerCase());
+      const owner=(issue.github||issue.repo||'').split('/')[0]||'';
+      return{
+        title:issue.title||'',
+        url:issue.url||'',
+        org:issue.org||'',
+        orgCat:orgMeta?.cat||'',
+        orgTags:orgMeta?.tags||[],
+        logo:owner?`https://github.com/${owner}.png?size=64`:'',
+        repo:issue.repo||issue.github||'',
+        created_at:issue.created_at||'',
+        labels:Array.isArray(issue.labels)?issue.labels.map(l=>typeof l==='string'?l:(l.name||'')):[],
+        comments:typeof issue.comments==='number'?issue.comments:Number(issue.comments||0),
+      };
+    });
+
+    allIssues.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    filterIssues();
+  }catch(err){
+    console.warn('Failed to load cached issues:',err);
+  }
 }
 
 function filterIssues(){
@@ -1031,6 +1068,7 @@ updateStats();
 requestAnimationFrame(()=>{
   applyFilters();
   renderTrending();
+  loadCachedIssues();
   checkAPI();
 });
 
