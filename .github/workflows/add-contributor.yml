@@ -5,6 +5,10 @@ on:
     types:
       - closed
 
+concurrency:
+  group: add-contributor-readme
+  cancel-in-progress: false
+  
 jobs:
   add-contributor:
     if: github.event.pull_request.merged == true
