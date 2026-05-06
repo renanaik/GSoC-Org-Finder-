@@ -77,7 +77,7 @@ jobs:
             core.info(`Matched routes: ${matchedRoutes.length ? matchedRoutes.join(', ') : 'none (used default)'}`);
             core.info(`Assigned: ${toAdd.join(', ')}`);
             } catch (err) {
-            core.warning('Failed to assign ${toAdd.join(', ')}: ${err.message}`);
+            core.warning(`Failed to assign ${toAdd.join(', ')}: ${err.message}`);
             }
             
 
