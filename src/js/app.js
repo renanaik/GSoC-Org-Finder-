@@ -65,7 +65,7 @@ const cdTimer=setInterval(updateCountdown,1000);
 // ANALYTICS ENGINE
 // ══════════════════════════════════════════════
 const AN={
-  g(k,d){try{return JSON.parse(localStorage.getItem('gaf_'+k))??d}catch{return d}},
+  g(k,d){try{return JSON.parse(localStorage.getItem('gaf_'+k))??d;}catch{return d;}},
   s(k,v){
     try{
       localStorage.setItem('gaf_'+k,JSON.stringify(v));
@@ -73,27 +73,27 @@ const AN={
       console.warn('Analytics storage write failed for key:',k,err);
     }
   },
-  inc(k){this.s(k,(this.g(k,0)+1))},
-  push(k,v,max=20){const a=this.g(k,[]);a.unshift(v);this.s(k,a.slice(0,max))},
-  today(){return new Date().toISOString().slice(0,10)},
+  inc(k){this.s(k,(this.g(k,0)+1));},
+  push(k,v,max=20){const a=this.g(k,[]);a.unshift(v);this.s(k,a.slice(0,max));},
+  today(){return new Date().toISOString().slice(0,10);},
   trackVisit(){
     this.inc('total');
     const td=this.today(),daily=this.g('daily',{});
     daily[td]=(daily[td]||0)+1;this.s('daily',daily);
     if(!sessionStorage.getItem('gaf_s'))sessionStorage.setItem('gaf_s',Date.now());
   },
-  trackSearch(t){if(t.length>1){this.inc('searches');this.push('sterms',t.toLowerCase().trim())}},
-  trackCat(c){if(c){this.inc('filters');const cf=this.g('cats',{});cf[c]=(cf[c]||0)+1;this.s('cats',cf)}},
-  trackOrg(n){this.inc('views');const oc=this.g('orgs',{});oc[n]=(oc[n]||0)+1;this.s('orgs',oc)},
-  todayVisits(){return this.g('daily',{})[this.today()]||0},
+  trackSearch(t){if(t.length>1){this.inc('searches');this.push('sterms',t.toLowerCase().trim());}},
+  trackCat(c){if(c){this.inc('filters');const cf=this.g('cats',{});cf[c]=(cf[c]||0)+1;this.s('cats',cf);}},
+  trackOrg(n){this.inc('views');const oc=this.g('orgs',{});oc[n]=(oc[n]||0)+1;this.s('orgs',oc);},
+  todayVisits(){return this.g('daily',{})[this.today()]||0;},
   sessionTime(){
     const s=sessionStorage.getItem('gaf_s');if(!s)return'—';
     const sec=Math.floor((Date.now()-parseInt(s))/1000);
     return sec<60?sec+'s':Math.floor(sec/60)+'m'+(sec%60)+'s';
   },
-  topCats(){return Object.entries(this.g('cats',{})).sort((a,b)=>b[1]-a[1]).slice(0,6)},
-  topOrgs(){return Object.entries(this.g('orgs',{})).sort((a,b)=>b[1]-a[1]).slice(0,5)},
-  topTerms(){const f={};this.g('sterms',[]).forEach(t=>{f[t]=(f[t]||0)+1});return Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,12)}
+  topCats(){return Object.entries(this.g('cats',{})).sort((a,b)=>b[1]-a[1]).slice(0,6);},
+  topOrgs(){return Object.entries(this.g('orgs',{})).sort((a,b)=>b[1]-a[1]).slice(0,5);},
+  topTerms(){const f={};this.g('sterms',[]).forEach(t=>{f[t]=(f[t]||0)+1;});return Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,12);}
 };
 AN.trackVisit();
 
@@ -188,14 +188,14 @@ function openAnalytics(){
   document.getElementById('anBg').classList.add('open');
   document.body.style.overflow='hidden';
 }
-function closeAnEvent(e){if(e.target===document.getElementById('anBg'))closeAn()}
-function closeAn(){document.getElementById('anBg').classList.remove('open');document.body.style.overflow=''}
+function closeAnEvent(e){if(e.target===document.getElementById('anBg'))closeAn();}
+function closeAn(){document.getElementById('anBg').classList.remove('open');document.body.style.overflow='';}
 
 // ══════════════════════════════════════════════
 // GITHUB API
 // ══════════════════════════════════════════════
 const API='/api/github';
-let cache=JSON.parse(localStorage.getItem('gaf_ghc')||'{}');
+const cache=JSON.parse(localStorage.getItem('gaf_ghc')||'{}');
 let modalIdx=-1,pills=new Set(),chips=new Set(),fetching=false,lastSearch='';
 let matchAllLanguages=false; // false = OR (any), true = AND (all)
 
@@ -234,7 +234,7 @@ async function fetchGH(repo){
     const d=await r.json();
     if(d.error)return null;
     cache[repo]=d;localStorage.setItem('gaf_ghc',JSON.stringify(cache));return d;
-  }catch{return null}
+  }catch{return null;}
 }
 
 async function fetchGFI(repo){
@@ -250,7 +250,7 @@ async function fetchGFI(repo){
     cache[cacheKey]={count:d.gfi,ts:Date.now()};
     localStorage.setItem('gaf_ghc',JSON.stringify(cache));
     return d.gfi;
-  }catch{return null}
+  }catch{return null;}
 }
 
 async function fetchAll(){
@@ -296,25 +296,25 @@ async function fetchModalGH(){
   }else document.getElementById('mFetchBtn').textContent='✗ Failed';
 }
 
-function fmt(n){return(!n&&n!==0)?'—':n>=1000?(n/1000).toFixed(1)+'k':String(n)}
+function fmt(n){return(!n&&n!==0)?'—':n>=1000?(n/1000).toFixed(1)+'k':String(n);}
 
 // ══════════════════════════════════════════════
 // HELPERS
 // ══════════════════════════════════════════════
-function yCls(y){return y>=8?'veteran':y>=4?'experienced':'newcomer'}
-function yLbl(y){return y>=8?'🏆 Veteran':y>=4?'⭐ Experienced':'🌱 Newcomer'}
-function yBdg(y){return y>=8?'bv':y>=4?'be':'bn'}
-function cLbl(c){return c==='hot'?'🔥 High':c==='moderate'?'🟡 Moderate':'😎 Low'}
-function cBdg(c){return c==='hot'?'bh':c==='moderate'?'bm':'bc'}
-function aLbl(a){return a==='active'?'⚡ Active':a==='moderate'?'📊 Moderate':a==='low'?'💤 Low':'○ —'}
-function aBdg(a){return a==='active'?'bac':a==='moderate'?'bam':a==='low'?'bal':'bna'}
-function catLabel(c){return{science:'Science',programming:'Programming',data:'Data',web:'Web',os:'OS',security:'Security',media:'Media',infra:'Infra',ai:'AI',dev:'Dev Tools',other:'Other'}[c]||c}
-function catBdg(c){return'cb-'+(c||'other')}
+function yCls(y){return y>=8?'veteran':y>=4?'experienced':'newcomer';}
+function yLbl(y){return y>=8?'🏆 Veteran':y>=4?'⭐ Experienced':'🌱 Newcomer';}
+function yBdg(y){return y>=8?'bv':y>=4?'be':'bn';}
+function cLbl(c){return c==='hot'?'🔥 High':c==='moderate'?'🟡 Moderate':'😎 Low';}
+function cBdg(c){return c==='hot'?'bh':c==='moderate'?'bm':'bc';}
+function aLbl(a){return a==='active'?'⚡ Active':a==='moderate'?'📊 Moderate':a==='low'?'💤 Low':'○ —';}
+function aBdg(a){return a==='active'?'bac':a==='moderate'?'bam':a==='low'?'bal':'bna';}
+function catLabel(c){return{science:'Science',programming:'Programming',data:'Data',web:'Web',os:'OS',security:'Security',media:'Media',infra:'Infra',ai:'AI',dev:'Dev Tools',other:'Other'}[c]||c;}
+function catBdg(c){return'cb-'+(c||'other');}
 
 // ══════════════════════════════════════════════
 // COMPARE
 // ══════════════════════════════════════════════
-let compareSet=new Set(); // stores ORGS indices
+const compareSet=new Set(); // stores ORGS indices
 
 function toggleCompare(idx,e){
   if(e){e.stopPropagation();}
@@ -402,7 +402,7 @@ function renderCompareTable(){
     {label:'Languages',   vals:arr.map(o=>o.tags.slice(0,3).join(', ')), type:'text'},
   ];
 
-  let thead=`<tr><th>Metric</th>${arr.map(o=>`<th>${o.name.length>22?o.name.slice(0,22)+'…':o.name}</th>`).join('')}</tr>`;
+  const thead=`<tr><th>Metric</th>${arr.map(o=>`<th>${o.name.length>22?o.name.slice(0,22)+'…':o.name}</th>`).join('')}</tr>`;
   let tbody='';
   for(const row of rows){
     let cells='';
@@ -522,18 +522,22 @@ function applyFilters(){
   const compF=document.getElementById('compFilter').value;
   const sort=document.getElementById('sortSelect').value;
 
-  if(search!==lastSearch&&search.length>1){AN.trackSearch(search);lastSearch=search}
+  if(search!==lastSearch&&search.length>1){AN.trackSearch(search);lastSearch=search;}
   if(cat)AN.trackCat(cat);
 
-  let res=ORGS.filter(o=>{
+  const res=ORGS.filter(o=>{
     const txt=(o.name+' '+o.tags.join(' ')+' '+o.desc).toLowerCase();
     if(cat&&o.cat!==cat)return false;
     if(lang&&!txt.includes(lang))return false;
     if(search&&!txt.includes(search))return false;
-    if(yearsF){const yc=yCls(o.years);if(yearsF!==yc)return false}
+    if(yearsF){const yc=yCls(o.years);if(yearsF!==yc)return false;}
     if(compF&&o.competition!==compF)return false;
+
+    if(pills.size>0){let m=false;pills.forEach(p=>{if(txt.includes(p))m=true;});if(!m)return false;}
+
     // Use proper language matching with LANGUAGE_MAP
     if(pills.size>0&&!orgMatchesLanguages(o,pills))return false;
+ 
     if(chips.has('veteran')&&yCls(o.years)!=='veteran')return false;
     if(chips.has('newcomer')&&yCls(o.years)!=='newcomer')return false;
     if(chips.has('hot')&&o.competition!=='hot')return false;
@@ -854,17 +858,22 @@ globalThis.clearAllLanguages = clearAllLanguages;
 const chipCls={veteran:'cv',newcomer:'cn',hot:'ch',chill:'cc',active:'ca', bookmarked:'cb'};
 function toggleChip(k){
   const el=document.getElementById('chip-'+k);
-  if(chips.has(k)){chips.delete(k);el.className='chip'}
-  else{chips.add(k);el.className='chip '+chipCls[k]}
+  if(chips.has(k)){chips.delete(k);el.className='chip';}
+  else{chips.add(k);el.className='chip '+chipCls[k];}
   applyFilters();
 }
 function resetFilters(){
-  ['searchInput','catFilter','langFilter','yearsFilter','compFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  ['searchInput','catFilter','langFilter','yearsFilter','compFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('sortSelect').value='alpha';
   pills.clear();chips.clear();
+
+  document.querySelectorAll('.pill.active').forEach(p=>p.classList.remove('active'));
+  Object.keys(chipCls).forEach(k=>{const e=document.getElementById('chip-'+k);if(e)e.className='chip';});
+
   document.querySelectorAll('.pill.active').forEach(p=>{p.classList.remove('active');p.setAttribute('aria-pressed','false');});
   Object.keys(chipCls).forEach(k=>{const e=document.getElementById('chip-'+k);if(e)e.className='chip'});
   renderSelectedLanguages();
+ 
   applyFilters();
 }
 
@@ -947,7 +956,7 @@ function openModal(idx){
     });
   }
 }
-function closeModalEv(e){if(e.target===document.getElementById('modalBg'))closeModal()}
+function closeModalEv(e){if(e.target===document.getElementById('modalBg'))closeModal();}
 function closeModal(){document.getElementById('modalBg').classList.remove('open');document.body.style.overflow='';modalIdx=-1;}
 
 // ══════════════════════════════════════════════
@@ -1140,7 +1149,7 @@ function showMoreIssues(){
   document.getElementById('issShown').textContent=shownIssues;
 }
 
-ORGS.forEach(o=>{if(o.github&&cache[o.github])o._gh=cache[o.github]});
+ORGS.forEach(o=>{if(o.github&&cache[o.github])o._gh=cache[o.github];});
 showSkeletons();
 updateStats();
 renderSelectedLanguages();

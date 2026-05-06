@@ -440,7 +440,7 @@
         </div>
         <span class="text-base sm:text-lg font-extrabold tracking-tighter text-zinc-900 font-headline"><span class="hidden xs:inline">GSoC 2026 </span><span class="text-primary italic">Org Finder</span></span>
       </a>
-      <nav class="hidden md:flex items-center gap-6 text-sm font-medium tracking-tight">
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
         <a class="text-orange-600 font-bold border-b-2 border-orange-600" href="#orgs">Organizations</a>
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#guide">Guide</a>
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#watchlist">Watchlist</a>
@@ -451,12 +451,36 @@
     
     <!-- Right side: Toggle visible on all screens, GitHub button hidden on mobile -->
     <div class="flex items-center gap-2 sm:gap-3">
-      <button id="themeToggleBtn" onclick="toggleTheme()" class="inline-flex shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-full transition-colors" aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme">
-        <span class="material-symbols-outlined text-zinc-600">dark_mode</span>
+    
+      <button id="themeToggleBtn" onclick="toggleTheme()"
+        class="inline-flex shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-full transition-colors"
+        aria-label="Switch to dark theme" aria-pressed="false" title="Switch to dark theme">
+    
+        <span class="material-symbols-outlined text-zinc-600">
+          dark_mode
+        </span>
       </button>
-      <a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-" target="_blank" class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
-        <span class="material-symbols-outlined text-sm">star</span> Star & Contribute
+    
+      <!-- HELP BUTTON -->
+      <button id="helpBtn"
+        class="inline-flex shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-full transition-colors"
+        title="Keyboard shortcuts (?)">
+    
+        <span class="material-symbols-outlined text-zinc-600">
+          help
+        </span>
+      </button>
+    
+      <a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-" target="_blank"
+        class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 text-white text-xs font-bold hover:bg-zinc-700 transition-colors">
+    
+        <span class="material-symbols-outlined text-sm">
+          star
+        </span>
+    
+        Star & Contribute
       </a>
+    
     </div>
   </div>
 </header>
@@ -1871,6 +1895,30 @@ if(org.ideas){
   renderWatchlist();
   renderGoodFirstIssues();
   renderCompare();
+  const helpModal = document.getElementById('helpModal');
+const helpBtn = document.getElementById('helpBtn');
+
+function openHelpModal() {
+  helpModal.classList.add('open');
+}
+
+function closeHelpModal() {
+  helpModal.classList.remove('open');
+}
+
+helpBtn.addEventListener('click', openHelpModal);
+
+document.addEventListener('keydown', (e) => {
+
+  if (e.key === '?') {
+    openHelpModal();
+  }
+
+  if (e.key === 'Escape') {
+    closeHelpModal();
+  }
+
+});
 </script>
 
 <!-- Vercel Speed Insights -->
@@ -1882,5 +1930,103 @@ if(org.ideas){
     });
   }
 </script>
+
+<div class="modal-bg" id="helpModal">
+  <div class="modal">
+    
+    <button class="close-btn" onclick="closeHelpModal()">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+    <div class="modal-header">
+      <h2>Keyboard Shortcuts</h2>
+      <p>Quick shortcuts for navigation</p>
+    </div>
+
+    <div class="modal-body">
+      <div class="section-title">Keyboard Shortcuts</div>
+
+<table class="w-full text-sm">
+  <thead>
+    <tr class="border-b text-left">
+      <th class="py-2">Key</th>
+      <th class="py-2">Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="py-2">↑ ↓ ← →</td>
+      <td class="py-2">Move focus between cards</td>
+    </tr>
+
+    <tr>
+      <td class="py-2">Enter</td>
+      <td class="py-2">Open focused card</td>
+    </tr>
+
+    <tr>
+      <td class="py-2">C</td>
+      <td class="py-2">Toggle compare</td>
+    </tr>
+
+    <tr>
+      <td class="py-2">Esc</td>
+      <td class="py-2">Close panel</td>
+    </tr>
+
+    <tr>
+      <td class="py-2">?</td>
+      <td class="py-2">Toggle help dialog</td>
+    </tr>
+  </tbody>
+</table>
+
+       
+
+      </div>
+    </div>
+
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const helpModal = document.getElementById('helpModal');
+  const helpBtn = document.getElementById('helpBtn');
+
+  function openHelpModal() {
+    if (helpModal) {
+      helpModal.classList.add('open');
+    }
+  }
+
+  function closeHelpModal() {
+    if (helpModal) {
+      helpModal.classList.remove('open');
+    }
+  }
+
+  if (helpBtn) {
+    helpBtn.addEventListener('click', openHelpModal);
+  }
+
+  document.addEventListener('keydown', (e) => {
+
+    if (e.key === '?') {
+      openHelpModal();
+    }
+
+    if (e.key === 'Escape') {
+      closeHelpModal();
+    }
+
+  });
+
+  window.closeHelpModal = closeHelpModal;
+
+});
+</script>
 </body>
+
 </html>
