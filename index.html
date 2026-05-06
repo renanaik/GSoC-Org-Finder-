@@ -326,7 +326,7 @@
 
 <!-- ═══════════════════ NAVBAR ═══════════════════ -->
 <header class="fixed top-0 w-full z-50 bg-white/80 glass shadow-sm">
-  <div class="flex items-center justify-between px-4 sm:px-6 py-3 max-w-7xl mx-auto w-full"></div>
+  <div class="flex items-center justify-between px-4 sm:px-6 py-3 max-w-7xl mx-auto w-full">
     <div class="flex items-center gap-3 sm:gap-4 md:gap-8">
       <!-- Hamburger menu button (mobile only) -->
       <button id="menuBtn" onclick="toggleMenu()" class="inline-flex md:hidden shrink-0 items-center justify-center p-2 hover:bg-zinc-100/50 rounded-lg transition-colors" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
@@ -339,7 +339,7 @@
         </div>
         <span class="text-base sm:text-lg font-extrabold tracking-tighter text-zinc-900 font-headline"><span class="hidden xs:inline">GSoC 2026 </span><span class="text-primary italic">Org Finder</span></span>
       </a>
-      <nav>
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
         <a class="text-orange-600 font-bold border-b-2 border-orange-600" href="#orgs">Organizations</a>
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#guide">Guide</a>
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#watchlist">Watchlist</a>
@@ -381,6 +381,7 @@
       </a>
     
     </div>
+  </div>
 </header>
 
 <!-- Mobile Menu Overlay -->
