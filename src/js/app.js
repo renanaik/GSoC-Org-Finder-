@@ -532,12 +532,12 @@ function applyFilters(){
     if(search&&!txt.includes(search))return false;
     if(yearsF){const yc=yCls(o.years);if(yearsF!==yc)return false;}
     if(compF&&o.competition!==compF)return false;
-fix/help-modal-production
+
     if(pills.size>0){let m=false;pills.forEach(p=>{if(txt.includes(p))m=true;});if(!m)return false;}
 
     // Use proper language matching with LANGUAGE_MAP
     if(pills.size>0&&!orgMatchesLanguages(o,pills))return false;
- main
+ 
     if(chips.has('veteran')&&yCls(o.years)!=='veteran')return false;
     if(chips.has('newcomer')&&yCls(o.years)!=='newcomer')return false;
     if(chips.has('hot')&&o.competition!=='hot')return false;
@@ -866,14 +866,14 @@ function resetFilters(){
   ['searchInput','catFilter','langFilter','yearsFilter','compFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('sortSelect').value='alpha';
   pills.clear();chips.clear();
-fix/help-modal-production
+
   document.querySelectorAll('.pill.active').forEach(p=>p.classList.remove('active'));
   Object.keys(chipCls).forEach(k=>{const e=document.getElementById('chip-'+k);if(e)e.className='chip';});
 
   document.querySelectorAll('.pill.active').forEach(p=>{p.classList.remove('active');p.setAttribute('aria-pressed','false');});
   Object.keys(chipCls).forEach(k=>{const e=document.getElementById('chip-'+k);if(e)e.className='chip'});
   renderSelectedLanguages();
- main
+ 
   applyFilters();
 }
 
