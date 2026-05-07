@@ -1844,6 +1844,18 @@ if(org.ideas){
       });
     } catch (e) {
       console.error("GFI render failed:", e);
+      const container = document.querySelector('#issues .grid');
+      if (container) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white rounded-xl p-8 border border-zinc-100 text-center">
+            <p class="text-sm font-bold text-zinc-900 mb-2">Unable to load pre-fetched issues</p>
+            <p class="text-sm text-zinc-600 max-w-xl mx-auto">Cached issue data could not be retrieved at this time. Please refresh the page or try again later.</p>
+          </div>`;
+      }
+      const lastUpdatedEl = document.getElementById('issuesLastUpdated');
+      if (lastUpdatedEl) {
+        lastUpdatedEl.textContent = 'Last updated: unavailable';
+      }
     }
   }
 
