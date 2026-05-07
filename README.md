@@ -117,7 +117,7 @@ No sign-up. No install. No build step. Just open and explore.
 
 ---
 
-## 🗂️ All 185 GSoC 2026 Organizations
+## 🗂️ All 184 GSoC 2026 Organizations
 
 | Domain | Examples |
 |---|---|
@@ -228,7 +228,7 @@ For full functionality locally, run `vercel dev` to start the Edge Function.
 ---
 
 ## 🤝 Contributing
-
+Kindly read the Contributor Guide before contributing!!!
 Found a missing org, wrong category, or incorrect tags? PRs are very welcome!
 
 1. Fork the repo
@@ -288,6 +288,8 @@ The Edge Function proxies GitHub API calls so your token never hits the client.
 | `GET /api/github?repo=owner/repo&gfi=1&issues=1` | Full list of up to 30 open Good First Issues |
 
 All responses are cached in-memory for **1 hour** on the Edge runtime.
+## We are officially a Project for Nexus Spring of Code 2026
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/328b59f6-5a19-42bf-ad40-4ade9d86b4d4" />
 
 ## We thank all our Contributors for improving this project
 
@@ -299,11 +301,8 @@ All responses are cached in-memory for **1 hour** on the Edge runtime.
 4. **Mobile browsing?** Try portrait mode — everything scrolls smoothly
    
 ## ✨ Contributors
-
-<a href="https://github.com/S3DFX-CYBER/GSoC-Org-Finder-/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=S3DFX-CYBER/GSoC-Org-Finder-" alt="Contributors to GSoC Org Finder" />
-</a>
-
+<!-- CONTRIBUTORS_START -->
+<!-- CONTRIBUTORS_END -->
 ## 📄 License
 
 Apache 2.0 — made for GSoC beginners, by people who've been there.
