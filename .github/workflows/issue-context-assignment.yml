@@ -15,12 +15,7 @@ concurrency:
 
 jobs:
   handle-assignment:
-    if: >
-      github.event.issue.pull_request == null &&
-      (
-        contains(github.event.comment.body, '/assign') ||
-        contains(toLower(github.event.comment.body), 'assign me')
-      )
+    if: github.event.issue.pull_request == null
 
     runs-on: ubuntu-latest
 
@@ -45,17 +40,69 @@ jobs:
 
             const username = sender.login;
 
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
             // Ignore bots
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
             if (sender.type === 'Bot') {
               core.info('Ignoring bot user.');
               return;
             }
 
-            // ─────────────────────────────────────────────────────────────
-            // Load CONTRIBUTING guide
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
+            // Validate assignment command
+            // ─────────────────────────────────────────────
+            const commentBody = (comment.body || '').toLowerCase();
+
+            const wantsAssign =
+              commentBody.includes('/assign') ||
+              commentBody.includes('assign me');
+
+            const wantsUnassign =
+              commentBody.includes('/unassign') ||
+              commentBody.includes('unassign me');
+
+            if (!wantsAssign && !wantsUnassign) {
+              core.info('No assignment command detected.');
+              return;
+            }
+
+            // ─────────────────────────────────────────────
+            // Handle unassignment
+            // ─────────────────────────────────────────────
+            if (wantsUnassign) {
+              const assignedUsers = (issue.assignees || []).map(a => a.login);
+
+              if (!assignedUsers.includes(username)) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number,
+                  body: `⚠️ @${username} is not assigned to this issue.`
+                });
+
+                return;
+              }
+
+              await github.rest.issues.removeAssignees({
+                owner,
+                repo,
+                issue_number,
+                assignees: [username]
+              });
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: `✅ Unassigned @${username} from this issue.`
+              });
+
+              return;
+            }
+
+            // ─────────────────────────────────────────────
+            // Load CONTRIBUTING.md
+            // ─────────────────────────────────────────────
             const contributingPaths = [
               'CONTRIBUTING.md',
               'Contributing.md',
@@ -76,9 +123,9 @@ jobs:
               return;
             }
 
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
             // Validate issue quality
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
             const title = issue.title || '';
             const body = issue.body || '';
 
@@ -90,6 +137,7 @@ jobs:
                 body:
                   '❌ Issue title is too short.\n\nPlease provide a meaningful issue title before requesting assignment.'
               });
+
               return;
             }
 
@@ -101,13 +149,14 @@ jobs:
                 body:
                   '❌ Issue description is too short.\n\nPlease explain the issue clearly before requesting assignment.'
               });
+
               return;
             }
 
-            // ─────────────────────────────────────────────────────────────
-            // Check existing assignees
-            // ─────────────────────────────────────────────────────────────
-            const existingAssignees = issue.assignees.map(a => a.login);
+            // ─────────────────────────────────────────────
+            // Prevent multiple assignees
+            // ─────────────────────────────────────────────
+            const existingAssignees = (issue.assignees || []).map(a => a.login);
 
             if (existingAssignees.length > 0) {
               await github.rest.issues.createComment({
@@ -117,12 +166,13 @@ jobs:
                 body:
                   `⚠️ This issue is already assigned to: ${existingAssignees.join(', ')}`
               });
+
               return;
             }
 
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
             // Determine contribution level
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
             const text = `${title}\n${body}`.toLowerCase();
 
             let level = 'level-1';
@@ -131,8 +181,8 @@ jobs:
               'architecture',
               'optimization',
               'security',
-              'edge function',
               'performance',
+              'edge function',
               'refactor',
               'api',
               'caching',
@@ -142,19 +192,25 @@ jobs:
             const intermediateKeywords = [
               'feature',
               'logic',
-              'filter',
-              'sorting',
               'analytics',
-              'ui improvement',
-              'enhancement'
+              'sorting',
+              'filter',
+              'enhancement',
+              'improvement'
             ];
 
             const hasAdvanced = advancedKeywords.some(k => text.includes(k));
             const hasIntermediate = intermediateKeywords.some(k => text.includes(k));
 
-            // ─────────────────────────────────────────────────────────────
-            // Check contributor PR history
-            // ─────────────────────────────────────────────────────────────
+            if (hasAdvanced) {
+              level = 'level-3';
+            } else if (hasIntermediate) {
+              level = 'level-2';
+            }
+
+            // ─────────────────────────────────────────────
+            // Fetch contributor merged PR history
+            // ─────────────────────────────────────────────
             const prs = await github.paginate(
               github.rest.pulls.list,
               {
@@ -173,15 +229,9 @@ jobs:
 
             const mergedCount = mergedByUser.length;
 
-            if (hasAdvanced) {
-              level = 'level-3';
-            } else if (hasIntermediate) {
-              level = 'level-2';
-            }
-
-            // ─────────────────────────────────────────────────────────────
-            // Enforce CONTRIBUTING rules
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
+            // Enforce Level-3 restriction
+            // ─────────────────────────────────────────────
             if (level === 'level-3' && mergedCount < 1) {
               await github.rest.issues.createComment({
                 owner,
@@ -195,10 +245,10 @@ jobs:
               return;
             }
 
-            // ─────────────────────────────────────────────────────────────
-            // Remove incorrect level labels
-            // ─────────────────────────────────────────────────────────────
-            const currentLabels = issue.labels.map(l => l.name);
+            // ─────────────────────────────────────────────
+            // Correct issue labels
+            // ─────────────────────────────────────────────
+            const currentLabels = (issue.labels || []).map(l => l.name);
 
             const levelLabels = ['level-1', 'level-2', 'level-3'];
 
@@ -214,12 +264,11 @@ jobs:
                   issue_number,
                   name: label
                 });
-              } catch (_) {}
+              } catch (err) {
+                core.warning(`Failed removing label ${label}: ${err.message}`);
+              }
             }
 
-            // ─────────────────────────────────────────────────────────────
-            // Add correct level label
-            // ─────────────────────────────────────────────────────────────
             if (!currentLabels.includes(level)) {
               await github.rest.issues.addLabels({
                 owner,
@@ -229,9 +278,9 @@ jobs:
               });
             }
 
-            // ─────────────────────────────────────────────────────────────
-            // Assign issue
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
+            // Assign contributor
+            // ─────────────────────────────────────────────
             await github.rest.issues.addAssignees({
               owner,
               repo,
@@ -239,9 +288,9 @@ jobs:
               assignees: [username]
             });
 
-            // ─────────────────────────────────────────────────────────────
-            // Success comment
-            // ─────────────────────────────────────────────────────────────
+            // ─────────────────────────────────────────────
+            // Success response
+            // ─────────────────────────────────────────────
             await github.rest.issues.createComment({
               owner,
               repo,
