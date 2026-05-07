@@ -12,30 +12,29 @@ concurrency:
 
 jobs:
   add-contributor:
-    # Only run when the PR was actually merged (not just closed/rejected)
+    # Only run when the PR was actually merged
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+
     permissions:
-      contents: write   # Required to push the README update
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Fetch the base branch so we can push back to it
           ref: ${{ github.event.pull_request.base.ref }}
 
       - name: Add Contributor to README
-        # Pass ALL user-controlled values via env: to prevent shell injection.
-        # Never use ${{ }} expressions directly inside a run: block with untrusted input.
         env:
           USERNAME: ${{ github.event.pull_request.user.login }}
         run: |
+          set -euo pipefail
+
           # ── Validate username ────────────────────────────────────────────────
-          # GitHub usernames may only contain alphanumerics and single hyphens,
-          # 1–39 characters long. Reject anything that doesn't match.
-          if [[ ! "$USERNAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,37}[a-zA-Z0-9]$|^[a-zA-Z0-9]$ ]]; then
-            echo "ERROR: Invalid or potentially malicious username: '$USERNAME'. Aborting."
+          if [[ ! "$USERNAME" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$ ]]; then
+            echo "ERROR: Invalid or potentially malicious username: '$USERNAME'."
             exit 1
           fi
 
@@ -43,35 +42,27 @@ jobs:
           PROFILE_URL="https://github.com/${USERNAME}"
           AVATAR_URL="https://github.com/${USERNAME}.png"
 
-          # The HTML entry that will be inserted into README.md
           LINK_MD="<a href=\"${PROFILE_URL}\"><img src=\"${AVATAR_URL}\" width=\"50px\" alt=\"${USERNAME}\" /></a>"
 
-          # ── Check for duplicate ──────────────────────────────────────────────
-          # Use -F (fixed-string) so the URL is never interpreted as a regex.
+          # ── Prevent duplicates ───────────────────────────────────────────────
           if grep -qF "href=\"${PROFILE_URL}\"" README.md; then
-            echo "ℹ️  Contributor '${USERNAME}' is already listed in README.md. Nothing to do."
+            echo "ℹ️ Contributor already exists in README.md"
             exit 0
           fi
 
-          # ── Safely insert the entry ──────────────────────────────────────────
-          # Escape characters that have special meaning in a sed replacement string
-          # (forward slash, backslash, ampersand).
+          # ── Escape sed replacement chars safely ─────────────────────────────
           ESCAPED_LINK=$(printf '%s\n' "$LINK_MD" | sed 's/[\/&]/\\&/g')
 
-          # Insert the new entry on the line immediately before <!-- CONTRIBUTORS_END -->
+          # ── Insert before CONTRIBUTORS_END marker ───────────────────────────
           sed -i "/<!-- CONTRIBUTORS_END -->/i\\${ESCAPED_LINK}" README.md
 
-          # ── Commit & push ────────────────────────────────────────────────────
-          git config --global user.name  "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add README.md
-
-          # Verify there is actually a change before committing
-          if git diff --cached --quiet; then
-            echo "ℹ️  No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "docs: add ${USERNAME} to contributors in README"
-          git push
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        with:
+          commit-message: "docs: add ${{ env.USERNAME }} to contributors"
+          title: "docs: add ${{ env.USERNAME }} to contributors"
+          body: "Automated contributor update."
+          branch: contributor-${{ env.USERNAME }}
+          delete-branch: true
+          add-paths: |
+            README.md
