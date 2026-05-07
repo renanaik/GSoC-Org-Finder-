@@ -1,38 +1,127 @@
-name: Refresh Good First Issues
+name: 🔄 Refresh Good First Issues + UI Data
 
 on:
   schedule:
     - cron: '0 */6 * * *'
+
   workflow_dispatch:
 
+concurrency:
+  group: refresh-good-first-issues
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
 jobs:
-  fetch:
+  refresh:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: read
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Fetch issues
+      # ─────────────────────────────────────────────
+      # Install dependencies if package.json exists
+      # ─────────────────────────────────────────────
+      - name: Install dependencies
+        if: hashFiles('package.json') != ''
+        run: npm ci
+
+      # ─────────────────────────────────────────────
+      # Refresh issue dataset
+      # ─────────────────────────────────────────────
+      - name: Fetch good first issues
         run: node agent/scripts/fetch-issues.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # ─────────────────────────────────────────────
+      # Optional UI cache generation
+      # ─────────────────────────────────────────────
+      - name: Generate derived UI data
+        run: |
+          if [ -f agent/scripts/generate-ui-cache.js ]; then
+            node agent/scripts/generate-ui-cache.js
+          else
+            echo "No UI cache generator found. Skipping."
+          fi
+
+      # ─────────────────────────────────────────────
+      # Optional org statistics refresh
+      # ─────────────────────────────────────────────
+      - name: Refresh organization metadata
+        run: |
+          if [ -f agent/scripts/refresh-org-stats.js ]; then
+            node agent/scripts/refresh-org-stats.js
+          else
+            echo "No org stats refresh script found. Skipping."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ─────────────────────────────────────────────
+      # Add updated timestamp
+      # ─────────────────────────────────────────────
+      - name: Update refresh timestamp
+        run: |
+          mkdir -p data
+
+          cat > data/last-updated.json <<EOF
+          {
+            "updatedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
+
+      # ─────────────────────────────────────────────
+      # Prevent empty PRs
+      # ─────────────────────────────────────────────
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      # ─────────────────────────────────────────────
+      # Create PR only when changes exist
+      # ─────────────────────────────────────────────
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 
-        #v8.1.1
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
-          commit-message: 'chore: refresh good first issues [skip actions]'
-          title: 'chore: refresh good first issues'
-          body: 'Automated refresh of good first issues'
+          commit-message: |
+            chore: refresh issue dataset and UI cache [skip actions]
+
+          title: |
+            chore: refresh good first issues + UI cache
+
+          body: |
+            ## Automated Refresh
+
+            This PR updates:
+
+            - good first issue dataset
+            - derived UI cache
+            - organization metadata
+            - refresh timestamps
+
+            Generated automatically by GitHub Actions.
+
           branch: refresh-issues
           delete-branch: true
+
           add-paths: |
             data/issues.json
+            data/last-updated.json
+            data/ui-cache.json
+            data/org-stats.json
