@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-07T01:59:22.409Z",
+  "updated_at": "2026-05-07T08:19:41.113Z",
   "source_org_count": 184,
   "issues": [
     {
@@ -590,6 +590,28 @@
       "language": null
     },
     {
+      "org": "Gemini CLI",
+      "github": "google-gemini/gemini-cli",
+      "logo": "https://avatars.githubusercontent.com/google-gemini",
+      "title": "トークンのリセット時間（カウントダウン等）を /stats model やインターフェース上に表示してほしい",
+      "url": "https://github.com/google-gemini/gemini-cli/issues/26623",
+      "repo": "google-gemini/gemini-cli",
+      "labels": [
+        "status/need-triage",
+        "priority/p3",
+        "area/core",
+        "area/platform",
+        "status/bot-triaged",
+        "kind/enhancement",
+        "help wanted",
+        "good first issue"
+      ],
+      "comments": 1,
+      "created_at": "2026-05-07T03:18:45Z",
+      "updated_at": "2026-05-07T03:20:07Z",
+      "language": null
+    },
+    {
       "org": "GeomScale",
       "github": "GeomScale/volesti",
       "logo": "https://avatars.githubusercontent.com/GeomScale",
@@ -854,11 +876,12 @@
         "component: ui",
         "good first issue",
         "📍 Assigned",
+        "📌 Pinned",
         "component: css"
       ],
-      "comments": 4,
+      "comments": 5,
       "created_at": "2026-05-05T19:44:46Z",
-      "updated_at": "2026-05-06T01:24:45Z",
+      "updated_at": "2026-05-07T02:48:27Z",
       "language": null
     },
     {
@@ -2589,9 +2612,9 @@
       "labels": [
         "good first issue"
       ],
-      "comments": 4,
+      "comments": 6,
       "created_at": "2026-02-22T22:45:13Z",
-      "updated_at": "2026-04-13T21:42:36Z",
+      "updated_at": "2026-05-07T03:05:56Z",
       "language": null
     },
     {
