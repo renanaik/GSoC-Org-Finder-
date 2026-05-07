@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-07T08:19:41.113Z",
+  "updated_at": "2026-05-07T13:32:33.250Z",
   "source_org_count": 184,
   "issues": [
     {
@@ -39,6 +39,22 @@
       "org": "AnkiDroid",
       "github": "ankidroid/Anki-Android",
       "logo": "https://avatars.githubusercontent.com/ankidroid",
+      "title": "Performance: Investigate startUpWebView",
+      "url": "https://github.com/ankidroid/Anki-Android/issues/20973",
+      "repo": "ankidroid/Anki-Android",
+      "labels": [
+        "Performance",
+        "Good First Issue"
+      ],
+      "comments": 0,
+      "created_at": "2026-05-07T11:33:04Z",
+      "updated_at": "2026-05-07T11:36:08Z",
+      "language": null
+    },
+    {
+      "org": "AnkiDroid",
+      "github": "ankidroid/Anki-Android",
+      "logo": "https://avatars.githubusercontent.com/ankidroid",
       "title": "Show progress when updating FSRS memory states",
       "url": "https://github.com/ankidroid/Anki-Android/issues/16642",
       "repo": "ankidroid/Anki-Android",
@@ -69,23 +85,6 @@
       "comments": 10,
       "created_at": "2020-09-10T15:26:28Z",
       "updated_at": "2026-04-30T14:58:24Z",
-      "language": null
-    },
-    {
-      "org": "AnkiDroid",
-      "github": "ankidroid/Anki-Android",
-      "logo": "https://avatars.githubusercontent.com/ankidroid",
-      "title": "Translation sync: improve result when no Pull Request is necessary",
-      "url": "https://github.com/ankidroid/Anki-Android/issues/20853",
-      "repo": "ankidroid/Anki-Android",
-      "labels": [
-        "Help Wanted",
-        "Good First Issue",
-        "Dev"
-      ],
-      "comments": 4,
-      "created_at": "2026-04-25T10:30:33Z",
-      "updated_at": "2026-04-29T10:33:27Z",
       "language": null
     },
     {
@@ -536,6 +535,25 @@
       "org": "FreeCAD",
       "github": "FreeCAD/FreeCAD",
       "logo": "https://avatars.githubusercontent.com/FreeCAD",
+      "title": "DXF: import does not work if the dxf file is in a folder named with non-english characters",
+      "url": "https://github.com/FreeCAD/FreeCAD/issues/21521",
+      "repo": "FreeCAD/FreeCAD",
+      "labels": [
+        "Mod: Core",
+        "Status: Needs confirmation",
+        "Good first issue",
+        "File format: DXF",
+        "Status: Needs feedback"
+      ],
+      "comments": 12,
+      "created_at": "2025-05-22T13:03:20Z",
+      "updated_at": "2026-05-07T12:25:19Z",
+      "language": null
+    },
+    {
+      "org": "FreeCAD",
+      "github": "FreeCAD/FreeCAD",
+      "logo": "https://avatars.githubusercontent.com/FreeCAD",
       "title": "Sketcher: Trim does not work with an external line and a circle",
       "url": "https://github.com/FreeCAD/FreeCAD/issues/24238",
       "repo": "FreeCAD/FreeCAD",
@@ -567,26 +585,6 @@
       "comments": 11,
       "created_at": "2024-08-15T19:07:42Z",
       "updated_at": "2026-05-05T00:09:12Z",
-      "language": null
-    },
-    {
-      "org": "FreeCAD",
-      "github": "FreeCAD/FreeCAD",
-      "logo": "https://avatars.githubusercontent.com/FreeCAD",
-      "title": "Core: Thumbnails for file browsers not created on Linux",
-      "url": "https://github.com/FreeCAD/FreeCAD/issues/20678",
-      "repo": "FreeCAD/FreeCAD",
-      "labels": [
-        "Type: Bug",
-        "Mod: Core",
-        "Good first issue",
-        "File format: FCStd",
-        "OS: Linux",
-        "Status: Confirmed"
-      ],
-      "comments": 8,
-      "created_at": "2025-04-07T10:22:26Z",
-      "updated_at": "2026-05-03T16:23:11Z",
       "language": null
     },
     {
@@ -812,6 +810,25 @@
       "org": "Internet Archive",
       "github": "internetarchive/openlibrary",
       "logo": "https://avatars.githubusercontent.com/internetarchive",
+      "title": "refactor: convert Follow.html from macro to template for better security and type safety",
+      "url": "https://github.com/internetarchive/openlibrary/issues/12634",
+      "repo": "internetarchive/openlibrary",
+      "labels": [
+        "Type: Bug",
+        "Priority: 3",
+        "Good First Issue",
+        "Needs: Breakdown",
+        "Lead: @mekarpeles"
+      ],
+      "comments": 4,
+      "created_at": "2026-05-05T22:46:23Z",
+      "updated_at": "2026-05-07T13:16:59Z",
+      "language": null
+    },
+    {
+      "org": "Internet Archive",
+      "github": "internetarchive/openlibrary",
+      "logo": "https://avatars.githubusercontent.com/internetarchive",
       "title": "F-string missing in facet_wrapper assert message (worksearch/subjects.py)",
       "url": "https://github.com/internetarchive/openlibrary/issues/12649",
       "repo": "internetarchive/openlibrary",
@@ -824,26 +841,7 @@
       ],
       "comments": 3,
       "created_at": "2026-05-06T06:05:17Z",
-      "updated_at": "2026-05-06T22:35:40Z",
-      "language": null
-    },
-    {
-      "org": "Internet Archive",
-      "github": "internetarchive/openlibrary",
-      "logo": "https://avatars.githubusercontent.com/internetarchive",
-      "title": "refactor: convert Follow.html from macro to template for better security and type safety",
-      "url": "https://github.com/internetarchive/openlibrary/issues/12634",
-      "repo": "internetarchive/openlibrary",
-      "labels": [
-        "Type: Bug",
-        "Priority: 3",
-        "Good First Issue",
-        "Needs: Breakdown",
-        "Lead: @mekarpeles"
-      ],
-      "comments": 3,
-      "created_at": "2026-05-05T22:46:23Z",
-      "updated_at": "2026-05-06T14:47:33Z",
+      "updated_at": "2026-05-07T09:18:50Z",
       "language": null
     },
     {
@@ -1219,6 +1217,40 @@
       "org": "LLVM Compiler Infrastructure",
       "github": "llvm/llvm-project",
       "logo": "https://avatars.githubusercontent.com/llvm",
+      "title": "[DAG][X86] Use shrdq to insert into a bitfield",
+      "url": "https://github.com/llvm/llvm-project/issues/112488",
+      "repo": "llvm/llvm-project",
+      "labels": [
+        "good first issue",
+        "backend:X86",
+        "missed-optimization"
+      ],
+      "comments": 10,
+      "created_at": "2024-10-16T07:03:11Z",
+      "updated_at": "2026-05-07T09:40:13Z",
+      "language": null
+    },
+    {
+      "org": "LLVM Compiler Infrastructure",
+      "github": "llvm/llvm-project",
+      "logo": "https://avatars.githubusercontent.com/llvm",
+      "title": "Add a `--verbose` option for `llvm-strip`",
+      "url": "https://github.com/llvm/llvm-project/issues/123041",
+      "repo": "llvm/llvm-project",
+      "labels": [
+        "enhancement",
+        "good first issue",
+        "tools:llvm-objcopy/strip"
+      ],
+      "comments": 12,
+      "created_at": "2025-01-15T11:04:29Z",
+      "updated_at": "2026-05-07T08:28:11Z",
+      "language": null
+    },
+    {
+      "org": "LLVM Compiler Infrastructure",
+      "github": "llvm/llvm-project",
+      "logo": "https://avatars.githubusercontent.com/llvm",
       "title": "[clang] --entry command line option is broken",
       "url": "https://github.com/llvm/llvm-project/issues/68355",
       "repo": "llvm/llvm-project",
@@ -1229,39 +1261,6 @@
       "comments": 13,
       "created_at": "2023-10-05T21:30:34Z",
       "updated_at": "2026-05-06T21:26:11Z",
-      "language": null
-    },
-    {
-      "org": "LLVM Compiler Infrastructure",
-      "github": "llvm/llvm-project",
-      "logo": "https://avatars.githubusercontent.com/llvm",
-      "title": "[AArch64] Add support for MSVC-style mangling for SVE",
-      "url": "https://github.com/llvm/llvm-project/issues/196170",
-      "repo": "llvm/llvm-project",
-      "labels": [
-        "good first issue",
-        "backend:AArch64",
-        "clang:codegen"
-      ],
-      "comments": 5,
-      "created_at": "2026-05-06T20:10:34Z",
-      "updated_at": "2026-05-06T21:08:24Z",
-      "language": null
-    },
-    {
-      "org": "LLVM Compiler Infrastructure",
-      "github": "llvm/llvm-project",
-      "logo": "https://avatars.githubusercontent.com/llvm",
-      "title": "[Flang] IARGC can't be used in a range loop",
-      "url": "https://github.com/llvm/llvm-project/issues/158438",
-      "repo": "llvm/llvm-project",
-      "labels": [
-        "good first issue",
-        "flang:frontend"
-      ],
-      "comments": 16,
-      "created_at": "2025-09-13T20:52:41Z",
-      "updated_at": "2026-05-06T20:36:45Z",
       "language": null
     },
     {
@@ -1666,6 +1665,40 @@
       "org": "OpenVINO Toolkit",
       "github": "openvinotoolkit/openvino",
       "logo": "https://avatars.githubusercontent.com/openvinotoolkit",
+      "title": "[Good First Issue]: Support aten::rrelu and aten::rrelu_ for pytorch models",
+      "url": "https://github.com/openvinotoolkit/openvino/issues/23746",
+      "repo": "openvinotoolkit/openvino",
+      "labels": [
+        "good first issue",
+        "category: PyTorch FE",
+        "no_stale"
+      ],
+      "comments": 21,
+      "created_at": "2024-03-28T11:22:44Z",
+      "updated_at": "2026-05-07T11:12:56Z",
+      "language": null
+    },
+    {
+      "org": "OpenVINO Toolkit",
+      "github": "openvinotoolkit/openvino",
+      "logo": "https://avatars.githubusercontent.com/openvinotoolkit",
+      "title": "[Good First Issue] [ARM] [Debug Caps] : Implement register prints in just-in-time Kernels",
+      "url": "https://github.com/openvinotoolkit/openvino/issues/27715",
+      "repo": "openvinotoolkit/openvino",
+      "labels": [
+        "good first issue",
+        "category: CPU",
+        "platform: arm"
+      ],
+      "comments": 39,
+      "created_at": "2024-11-25T06:55:45Z",
+      "updated_at": "2026-05-07T10:00:13Z",
+      "language": null
+    },
+    {
+      "org": "OpenVINO Toolkit",
+      "github": "openvinotoolkit/openvino",
+      "logo": "https://avatars.githubusercontent.com/openvinotoolkit",
       "title": "[Good First Issue]: Support aten::Delete aten::str aten::take",
       "url": "https://github.com/openvinotoolkit/openvino/issues/28707",
       "repo": "openvinotoolkit/openvino",
@@ -1677,39 +1710,6 @@
       "comments": 15,
       "created_at": "2025-01-27T23:12:04Z",
       "updated_at": "2026-05-05T09:33:33Z",
-      "language": null
-    },
-    {
-      "org": "OpenVINO Toolkit",
-      "github": "openvinotoolkit/openvino",
-      "logo": "https://avatars.githubusercontent.com/openvinotoolkit",
-      "title": "[Good First Issue]: Support prim::CallMethod",
-      "url": "https://github.com/openvinotoolkit/openvino/issues/29720",
-      "repo": "openvinotoolkit/openvino",
-      "labels": [
-        "good first issue",
-        "no_stale"
-      ],
-      "comments": 17,
-      "created_at": "2025-03-25T12:14:07Z",
-      "updated_at": "2026-04-25T18:41:20Z",
-      "language": null
-    },
-    {
-      "org": "OpenVINO Toolkit",
-      "github": "openvinotoolkit/openvino",
-      "logo": "https://avatars.githubusercontent.com/openvinotoolkit",
-      "title": "[Good First Issue][JAX FE]: Support jax.lax.scatter operation for JAX",
-      "url": "https://github.com/openvinotoolkit/openvino/issues/26573",
-      "repo": "openvinotoolkit/openvino",
-      "labels": [
-        "good first issue",
-        "no_stale",
-        "category: JAX FE"
-      ],
-      "comments": 16,
-      "created_at": "2024-09-12T20:00:04Z",
-      "updated_at": "2026-04-10T17:19:37Z",
       "language": null
     },
     {
@@ -1762,170 +1762,6 @@
       "comments": 67,
       "created_at": "2025-11-10T13:24:25Z",
       "updated_at": "2026-05-05T03:28:31Z",
-      "language": null
-    },
-    {
-      "org": "PEcAn Project",
-      "github": "PecanProject/pecan",
-      "logo": "https://avatars.githubusercontent.com/PecanProject",
-      "title": "Clean up and consolidate issue/PR labels (and update labeler workflow)",
-      "url": "https://github.com/PecanProject/pecan/issues/3696",
-      "repo": "PecanProject/pecan",
-      "labels": [
-        "good first issue"
-      ],
-      "comments": 8,
-      "created_at": "2025-12-04T03:22:32Z",
-      "updated_at": "2026-03-05T17:48:08Z",
-      "language": null
-    },
-    {
-      "org": "PEcAn Project",
-      "github": "PecanProject/pecan",
-      "logo": "https://avatars.githubusercontent.com/PecanProject",
-      "title": "Fix hack in trait.lookup function",
-      "url": "https://github.com/PecanProject/pecan/issues/729",
-      "repo": "PecanProject/pecan",
-      "labels": [
-        "Priority: 02 - Normal",
-        "good first issue",
-        "Status: Not started",
-        "Status: Stale"
-      ],
-      "comments": 4,
-      "created_at": "2016-02-22T20:49:45Z",
-      "updated_at": "2026-01-22T18:26:46Z",
-      "language": null
-    },
-    {
-      "org": "PEcAn Project",
-      "github": "PecanProject/pecan",
-      "logo": "https://avatars.githubusercontent.com/PecanProject",
-      "title": "Make `BADM_IC_process()` use PEcAn Settings / MultiSettings consistently",
-      "url": "https://github.com/PecanProject/pecan/issues/3699",
-      "repo": "PecanProject/pecan",
-      "labels": [
-        "good first issue"
-      ],
-      "comments": 7,
-      "created_at": "2025-12-05T00:09:53Z",
-      "updated_at": "2025-12-27T09:45:30Z",
-      "language": null
-    },
-    {
-      "org": "Pharo Consortium",
-      "github": "pharo-project/pharo",
-      "logo": "https://avatars.githubusercontent.com/pharo-project",
-      "title": "inspectionRichText is broken with the inspector API changes.",
-      "url": "https://github.com/pharo-project/pharo/issues/19348",
-      "repo": "pharo-project/pharo",
-      "labels": [
-        "Type: Bug",
-        "Good first issue"
-      ],
-      "comments": 3,
-      "created_at": "2026-02-14T11:14:25Z",
-      "updated_at": "2026-04-08T06:59:27Z",
-      "language": null
-    },
-    {
-      "org": "Pharo Consortium",
-      "github": "pharo-project/pharo",
-      "logo": "https://avatars.githubusercontent.com/pharo-project",
-      "title": "String>>asTime should be deprecated",
-      "url": "https://github.com/pharo-project/pharo/issues/19455",
-      "repo": "pharo-project/pharo",
-      "labels": [
-        "Type: Cleanup",
-        "Good first issue"
-      ],
-      "comments": 0,
-      "created_at": "2026-03-23T09:34:03Z",
-      "updated_at": "2026-03-25T14:42:36Z",
-      "language": null
-    },
-    {
-      "org": "Pharo Consortium",
-      "github": "pharo-project/pharo",
-      "logo": "https://avatars.githubusercontent.com/pharo-project",
-      "title": "[ Deprecate ] selectorsWithArgs:",
-      "url": "https://github.com/pharo-project/pharo/issues/19467",
-      "repo": "pharo-project/pharo",
-      "labels": [
-        "Type: Bug",
-        "Good first issue"
-      ],
-      "comments": 0,
-      "created_at": "2026-03-25T13:16:49Z",
-      "updated_at": "2026-03-25T14:42:12Z",
-      "language": null
-    },
-    {
-      "org": "preCICE",
-      "github": "precice/precice",
-      "logo": "https://avatars.githubusercontent.com/precice",
-      "title": "Multiple SolverInterfaces using the C and Fortran bindings",
-      "url": "https://github.com/precice/precice/issues/1200",
-      "repo": "precice/precice",
-      "labels": [
-        "bug",
-        "good first issue",
-        "breaking change",
-        "low priority"
-      ],
-      "comments": 5,
-      "created_at": "2022-03-10T11:06:04Z",
-      "updated_at": "2026-04-27T09:01:20Z",
-      "language": null
-    },
-    {
-      "org": "preCICE",
-      "github": "precice/precice",
-      "logo": "https://avatars.githubusercontent.com/precice",
-      "title": "Thread-safe Participant",
-      "url": "https://github.com/precice/precice/issues/2407",
-      "repo": "precice/precice",
-      "labels": [
-        "enhancement",
-        "thesis",
-        "good first issue"
-      ],
-      "comments": 13,
-      "created_at": "2025-12-02T12:35:36Z",
-      "updated_at": "2026-03-20T07:22:55Z",
-      "language": null
-    },
-    {
-      "org": "preCICE",
-      "github": "precice/precice",
-      "logo": "https://avatars.githubusercontent.com/precice",
-      "title": "Configurable RBF cut-off threshold",
-      "url": "https://github.com/precice/precice/issues/1265",
-      "repo": "precice/precice",
-      "labels": [
-        "enhancement",
-        "good first issue",
-        "configuration"
-      ],
-      "comments": 1,
-      "created_at": "2022-04-25T12:07:28Z",
-      "updated_at": "2026-03-16T10:58:55Z",
-      "language": null
-    },
-    {
-      "org": "QC-Devs",
-      "github": "theochem/gbasis",
-      "logo": "https://avatars.githubusercontent.com/theochem",
-      "title": "[REQUEST] Direct Support for Basis-Set-Exchange",
-      "url": "https://github.com/theochem/gbasis/issues/209",
-      "repo": "theochem/gbasis",
-      "labels": [
-        "enhancement",
-        "good first issue"
-      ],
-      "comments": 11,
-      "created_at": "2025-04-04T21:13:08Z",
-      "updated_at": "2026-03-26T12:59:48Z",
       "language": null
     },
     {
