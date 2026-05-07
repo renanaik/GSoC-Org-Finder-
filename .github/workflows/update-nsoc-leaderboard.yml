@@ -1,7 +1,7 @@
 name: 🔄 Update NSoC Leaderboard
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - closed
@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
+  issues: write
 
 concurrency:
   group: update-nsoc-leaderboard
@@ -19,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # SAFE:
+      # Never checkout attacker PR code
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -35,17 +39,39 @@ jobs:
         run: |
           node .github/scripts/update-leaderboard.js
 
-      - name: Commit leaderboard changes
+      - name: Check for changes
+        id: changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add data/nsoc-leaderboard.json
-
-          if git diff --cached --quiet; then
-            echo "No leaderboard changes detected"
-            exit 0
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-          git commit -m "chore: update NSoC leaderboard [skip actions]"
-          git push
+      - name: Create Pull Request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: |
+            chore: update NSoC leaderboard [skip actions]
+
+          title: |
+            chore: update NSoC leaderboard
+
+          body: |
+            ## Automated Leaderboard Update
+
+            This PR updates:
+
+            - contributor scores
+            - merged PR counts
+            - open PR counts
+            - contributor rankings
+
+            Generated automatically by GitHub Actions.
+
+          branch: refresh-nsoc-leaderboard
+          delete-branch: true
+
+          add-paths: |
+            data/nsoc-leaderboard.json
