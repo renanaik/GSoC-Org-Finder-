@@ -1159,6 +1159,29 @@
     'robotics': ['robotics', 'robot', 'ros']
   };
 
+  // Compatibility layer: expose a single LANGUAGE_MAP and shared `pills` set
+  // so the embedded script and any external `src/js/app.js` logic agree.
+  (function buildCompatibilityLayer(){
+    // Expose the selectedLanguages set as `pills` for compatibility
+    globalThis.pills = selectedLanguages;
+    // Expose matchAllLanguages as a global variable reference (kept in sync below)
+    globalThis.matchAllLanguages = matchAllLanguages;
+
+    // Build a LANGUAGE_MAP with display-label keys matching src/js/app.js expectations
+    const toDisplayKey = (k) => {
+      if (k === 'ml/ai') return 'ML/AI';
+      if (k === 'c/c++') return 'C/C++';
+      return k.split(/[\s\/]+/).map(p => p.charAt(0).toUpperCase()+p.slice(1)).join(' ');
+    };
+    const LANG_MAP = {};
+    Object.keys(LANGUAGE_ALIASES).forEach(k => {
+      LANG_MAP[toDisplayKey(k)] = LANGUAGE_ALIASES[k];
+    });
+    // Also expose the lowercase-keyed aliases for any consumers that expect that
+    Object.keys(LANGUAGE_ALIASES).forEach(k => { LANG_MAP[k] = LANGUAGE_ALIASES[k]; });
+    globalThis.LANGUAGE_MAP = globalThis.LANGUAGE_MAP || LANG_MAP;
+  })();
+
   function updateLanguageModeHint() {
     const hint = document.getElementById('languageLogicHint');
     if (!hint) return;
@@ -1772,6 +1795,8 @@ if(org.ideas){
   document.getElementById('complexityFilter').addEventListener('change', applyFilters);
   document.getElementById('matchAllLanguagesToggle')?.addEventListener('change', (e) => {
     matchAllLanguages = e.target.checked;
+    // keep global in sync for any external code expecting `matchAllLanguages`
+    globalThis.matchAllLanguages = matchAllLanguages;
     applyFilters();
   });
   document.getElementById('loadMoreBtn').addEventListener('click', () => {
