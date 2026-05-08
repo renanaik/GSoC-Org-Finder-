@@ -1,91 +1,169 @@
-const fs = require('fs');
-const path = require('path');
-
-const leaderboardPath = path.join(process.cwd(), 'data/nsoc-leaderboard.json');
-
-if (!fs.existsSync(leaderboardPath)) {
-  console.log('## ⚠️ Leaderboard Data Missing');
-  process.exit(0);
-}
-
-const leaderboard = JSON.parse(
-  fs.readFileSync(leaderboardPath, 'utf8')
-);
+const token = process.env.GITHUB_TOKEN;
 
 const username = process.env.PR_AUTHOR;
-const merged = process.env.PR_MERGED === 'true';
 const action = process.env.PR_ACTION;
+const merged = process.env.PR_MERGED === 'true';
 
-const sorted = [...leaderboard.users]
-  .sort((a, b) => b.score - a.score);
+const owner = process.env.REPO_OWNER;
+const repo = process.env.REPO_NAME;
 
-const rank = sorted.findIndex(
-  u => u.username.toLowerCase() === username.toLowerCase()
-) + 1;
+async function github(path) {
+  const res = await fetch(`https://api.github.com${path}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'nsoc-leaderboard'
+    }
+  });
 
-const currentUser = sorted.find(
-  u => u.username.toLowerCase() === username.toLowerCase()
-);
+  if (!res.ok) {
+    throw new Error(`GitHub API ${res.status}`);
+  }
 
-if (!currentUser) {
-  console.log(
-`## 👋 Welcome Contributor
+  return res.json();
+}
 
-Hi @${username}!
+async function getAllClosedPRs() {
+  let page = 1;
+  let all = [];
 
-Thanks for contributing to this repository 🚀`
+  while (true) {
+    const prs = await github(
+      `/repos/${owner}/${repo}/pulls?state=closed&per_page=100&page=${page}`
+    );
+
+    if (!prs.length) break;
+
+    all.push(...prs);
+
+    page++;
+  }
+
+  return all;
+}
+
+(async () => {
+  const prs = await getAllClosedPRs();
+
+  const contributorMap = new Map();
+
+  for (const pr of prs) {
+    if (!pr.user) continue;
+
+    const login = pr.user.login;
+
+    if (!contributorMap.has(login)) {
+      contributorMap.set(login, {
+        username: login,
+        merged: 0,
+        closed: 0,
+        score: 0
+      });
+    }
+
+    const user = contributorMap.get(login);
+
+    user.closed++;
+
+    if (pr.merged_at) {
+      user.merged++;
+      user.score += 10;
+    }
+  }
+
+  // Add open PR score
+  const openPRs = await github(
+    `/repos/${owner}/${repo}/pulls?state=open&per_page=100`
   );
 
-  process.exit(0);
-}
+  for (const pr of openPRs) {
+    if (!pr.user) continue;
 
-const nearby = sorted.slice(
-  Math.max(rank - 2, 0),
-  Math.min(rank + 1, sorted.length)
-);
+    const login = pr.user.login;
 
-let header = '## 📊 Monthly Leaderboard';
+    if (!contributorMap.has(login)) {
+      contributorMap.set(login, {
+        username: login,
+        merged: 0,
+        closed: 0,
+        score: 0
+      });
+    }
 
-if (action === 'opened') {
-  header = '## 🚀 Pull Request Opened';
-}
+    const user = contributorMap.get(login);
 
-if (merged) {
-  header = '## 🎉 Pull Request Merged';
-}
+    user.score += 1;
+  }
 
-if (action === 'closed' && !merged) {
-  header = '## 📌 Pull Request Closed';
-}
+  const leaderboard = Array.from(contributorMap.values())
+    .sort((a, b) => b.score - a.score);
 
-let body = `${header}\n\n`;
+  const rank =
+    leaderboard.findIndex(
+      u => u.username.toLowerCase() === username.toLowerCase()
+    ) + 1;
 
-body += `Hi @${username}! Here's your current ranking:\n\n`;
+  const current =
+    leaderboard.find(
+      u => u.username.toLowerCase() === username.toLowerCase()
+    );
 
-body += '| Rank | User | Open PRs | Merged PRs | Score |\n';
-body += '|---|---|---|---|---|\n';
+  let title = '## 📊 Monthly Leaderboard';
 
-for (const user of nearby) {
-  const userRank = sorted.indexOf(user) + 1;
-  const highlight = user.username.toLowerCase() === username.toLowerCase()
-    ? ' ✨'
-    : '';
+  if (action === 'opened') {
+    title = '## 🚀 Pull Request Opened';
+  }
 
-  body += `| ${userRank} | @${user.username}${highlight} | ${user.open_prs} | ${user.merged_prs} | ${user.score} |\n`;
-}
+  if (merged) {
+    title = '## 🎉 Pull Request Merged';
+  }
 
-body += '\n';
+  if (action === 'closed' && !merged) {
+    title = '## 📌 Pull Request Closed';
+  }
 
-if (merged) {
-  body += 'Congratulations on getting your PR merged 🚀\n\n';
-}
+  const nearby = leaderboard.slice(
+    Math.max(rank - 2, 0),
+    Math.min(rank + 1, leaderboard.length)
+  );
 
-if (action === 'closed' && !merged) {
-  body += 'This PR was closed without merge. Keep improving and contributing 💡\n\n';
-}
+  let md = '';
 
-body += `Current Rank: **#${rank}**\n\n`;
-body += `Current Score: **${currentUser.score}**\n\n`;
-body += 'Keep contributing to climb the leaderboard 📈';
+  md += `<!-- leaderboard-${action} -->\n\n`;
 
-console.log(body);
+  md += `${title}\n\n`;
+
+  md += `Hi @${username}! Here's your current ranking:\n\n`;
+
+  md += '| Rank | User | Merged PRs | Score |\n';
+  md += '|---|---|---|---|\n';
+
+  for (const user of nearby) {
+    const r = leaderboard.indexOf(user) + 1;
+
+    const highlight =
+      user.username.toLowerCase() === username.toLowerCase()
+        ? ' ✨'
+        : '';
+
+    md += `| ${r} | @${user.username}${highlight} | ${user.merged} | ${user.score} |\n`;
+  }
+
+  md += '\n';
+
+  if (merged) {
+    md += 'Congratulations on getting your PR merged 🚀\n\n';
+  }
+
+  if (action === 'closed' && !merged) {
+    md += 'This PR was closed without merge. Keep contributing 💡\n\n';
+  }
+
+  md += `Current Rank: **#${rank || 'N/A'}**\n\n`;
+
+  md += `Current Score: **${current?.score || 0}**\n\n`;
+
+  md += 'Keep contributing to climb the leaderboard 📈';
+
+  console.log(md);
+})();
