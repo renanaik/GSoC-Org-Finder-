@@ -4,16 +4,16 @@ on:
   pull_request_target:
     types:
       - opened
-      - closed
       - reopened
+      - closed
 
 permissions:
-  contents: read
   pull-requests: write
   issues: write
+  contents: read
 
 concurrency:
-  group: nsoc-pr-comments-${{ github.event.pull_request.number }}
+  group: nsoc-leaderboard-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
 
     steps:
       # SAFE:
-      # checkout only trusted base repo code
+      # only checkout trusted base repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -33,10 +33,12 @@ jobs:
 
       - name: Generate leaderboard comment
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          PR_MERGED: ${{ github.event.pull_request.merged }}
-          PR_STATE: ${{ github.event.pull_request.state }}
           PR_ACTION: ${{ github.event.action }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
         run: |
           node .github/scripts/generate-leaderboard-comment.js > comment.md
 
@@ -49,7 +51,6 @@ jobs:
 
             const body = fs.readFileSync('comment.md', 'utf8');
 
-            // Prevent duplicate bot comments
             const comments = await github.paginate(
               github.rest.issues.listComments,
               {
@@ -60,13 +61,16 @@ jobs:
               }
             );
 
-            const alreadyCommented = comments.some(comment =>
+            const marker =
+              `leaderboard-${context.payload.action}`;
+
+            const alreadyExists = comments.some(comment =>
               comment.user &&
               comment.user.type === 'Bot' &&
-              comment.body.includes('Monthly Leaderboard')
+              comment.body.includes(marker)
             );
 
-            if (alreadyCommented && context.payload.action === 'opened') {
+            if (alreadyExists) {
               core.info('Leaderboard comment already exists.');
               return;
             }
