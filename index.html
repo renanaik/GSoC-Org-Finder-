@@ -1119,9 +1119,25 @@
   document.addEventListener('DOMContentLoaded', updateActiveSection);
 
   // ══════════════════════════════════════════════
+  // Shared escaping helper (for all dynamic text used in HTML strings)
+  // Prevents HTML injection via <, >, &, quotes.
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '<')
+      .replaceAll('>', '>')
+      .replaceAll('"', '"')
+      .replaceAll("'", '&#39;');
+  }
+
+  // NOTE: For JS-string contexts inside inline event handlers,
+  // we must also escape quotes. Prefer removing inline handlers.
+
+  // ══════════════════════════════════════════════
   // MAIN APP LOGIC
   // ══════════════════════════════════════════════
   let visibleCount = 12;
+
   let filteredOrgs = [...ORGS];
   let compareList = [];
   const bookmarkedSet = new Set(JSON.parse(localStorage.getItem('bookmarks') || '[]'));
@@ -1339,6 +1355,7 @@
 
   function renderOrgs(reset = true) {
     const grid = document.getElementById('orgGrid');
+
     const emptyState = document.getElementById('emptyState');
     if (reset) {
       grid.innerHTML = '';
@@ -1381,13 +1398,14 @@
             </button>
           </div>
         </div>
-        <h3 class="font-headline text-lg font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">${org.name}</h3>
-        <span class="category-tag">${org.cat.toUpperCase()}</span>
-        <p class="text-on-surface-variant text-sm leading-relaxed mb-4 line-clamp-2">${org.desc}</p>
+        <h3 class="font-headline text-lg font-bold text-on-surface mb-1 group-hover:text-primary transition-colors">${escapeHtml(org.name)}</h3>
+        <span class="category-tag">${escapeHtml(org.cat.toUpperCase())}</span>
+        <p class="text-on-surface-variant text-sm leading-relaxed mb-4 line-clamp-2">${escapeHtml(org.desc)}</p>
         <div class="flex flex-wrap gap-1.5 mb-4">
-          ${org.tags.slice(0, 3).map(t => `<span class="px-2 py-0.5 bg-surface-container-low text-[10px] font-mono rounded">${t}</span>`).join('')}
+          ${org.tags.slice(0, 3).map(t => `<span class="px-2 py-0.5 bg-surface-container-low text-[10px] font-mono rounded">${escapeHtml(t)}</span>`).join('')}
           ${org.tags.length > 3 ? `<span class="px-2 py-0.5 bg-surface-container-low text-[10px] font-mono rounded">+${org.tags.length - 3}</span>` : ''}
         </div>
+
         <div class="flex items-center justify-between pt-4 border-t border-zinc-100">
           <div class="flex items-center gap-3">
              <button onclick="toggleCompare(event, '${org.name}')" class="text-[10px] font-bold uppercase tracking-widest ${isComparing ? 'text-primary' : 'text-zinc-400'} hover:text-primary flex items-center gap-1">
