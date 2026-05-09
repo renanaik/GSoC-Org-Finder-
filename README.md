@@ -12,7 +12,7 @@ Join our Channel for community-related questions and feedback
 
 ## ✨ What is this?
 
-A fast, beautiful, single-page tool that helps GSoC 2026 applicants cut through all **185 selected organizations** and instantly find the ones that match *their* skills and interests.
+A fast, beautiful, single-page tool that helps GSoC 2026 applicants cut through all **184 selected organizations** and instantly find the ones that match *their* skills and interests.
 
 No sign-up. No install. No build step. Just open and explore.
 
@@ -45,7 +45,7 @@ No sign-up. No install. No build step. Just open and explore.
 
 | Feature | Details |
 |---------|---------|
-| 🔍 Search | Full-text across 185 orgs |
+| 🔍 Search | Full-text across 184 orgs |
 | 🏷️ Filters | 15+ domains, 30+ languages |
 | ⚖️ Compare | Up to 3 organizations side-by-side |
 | 🟢 Good Issues | Browse beginner-friendly issues |
@@ -81,7 +81,7 @@ No sign-up. No install. No build step. Just open and explore.
 - 🟢 Green/🔴 red highlighting for best and worst values across each metric
 
 ### 🟢 Good First Issues Page
-- 📄 Dedicated full-screen page listing **Good First Issues from all 185 orgs** 
+- 📄 Dedicated full-screen page listing **Good First Issues from all 184 orgs** 
 - ⚡ Fetched live via the GitHub API proxy (uses your token , respects rate limits )
 - 🔎 Filter by category , language , or free-text search 
 - 🔗 Each issue links directly to GitHub — sorted newest first 
