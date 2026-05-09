@@ -1,7 +1,7 @@
 /* eslint-env node */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const DATA_PATH = path.resolve(__dirname, '../../data/mentors.json');
 const MAX_FETCH_FAILED = 35;
@@ -16,8 +16,8 @@ function main() {
   }
 
   const entries = Object.values(parsed);
-  const fetchFailed = entries.filter((entry) => entry && entry.status === 'fetch-failed');
-  const noContact = entries.filter((entry) => entry && entry.status === 'no-contact-found');
+  const fetchFailed = entries.filter((entry) => entry?.status === 'fetch-failed');
+  const noContact = entries.filter((entry) => entry?.status === 'no-contact-found');
 
   // Threshold is set above the current baseline so the workflow catches regressions
   // without blocking until extractor coverage improves.

@@ -1,7 +1,7 @@
 /* eslint-env node */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const ORGS = require('../../src/js/org.js');
 
 const CONTACT_TIPS = {
@@ -31,7 +31,9 @@ const DEFAULT_HEADERS = {
   'User-Agent': 'gsoc-org-finder-mentor-refresh'
 };
 const CHANNEL_CONFIDENCE_REGEX = /\b(join|chat|channel|community|stream|forum|discussion|mailing|list|gsoc|mentor)\b/i;
-const MENTOR_WORDS = ['mentor', 'mentors', 'contact', 'contacts', 'maintainer', 'maintainers', 'reach out', 'gsoc'];
+const MENTOR_WORDS = ['mentor', 'contact', 'maintainer', 'reach out', 'gsoc'];
+const STOPWORD_NAMES = new Set(['improve', 'update', 'other', 'vulkan', 'skins', 'project', 'lua', 'declarative', 'choose', 'co', 'mentor', 'mentors', 'contact', 'contacts', 'maintainer', 'maintainers', 'gsoc', 'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'is', 'are', 'be', 'been', 'being', 'have', 'has', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'us', 'we', 'you', 'he', 'she', 'it', 'they']);
+const GENERIC_GITHUB_HANDLES = new Set(['mentor', 'mentors', 'contact', 'gsoc', 'ta', 'am', 'pm', 'io', 'org', 'com', 'net', 'google', 'github', 'heroku', 'aws', 'mdanalysis', 'xaos']);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -155,7 +157,7 @@ function detectChannelType(urlString) {
 function isLikelyMentor(text, handle = '') {
   const lowerText = String(text || '').toLowerCase();
   const lowerHandle = String(handle || '').toLowerCase();
-  return MENTOR_WORDS.some((word) => lowerText.includes(word) || (lowerHandle && lowerHandle.includes(word)));
+  return MENTOR_WORDS.some((word) => lowerText.includes(word) || lowerHandle?.includes(word));
 }
 
 function isMeaningfulLabel(label) {
@@ -248,16 +250,20 @@ function extractMentorMentions(text) {
       let handleMatch;
       while ((handleMatch = handleRegex.exec(snippet)) !== null) {
         const github = handleMatch[2];
+        if (!isMeaningfulGitHubHandle(github)) continue;
         results.push({
           github,
           githubUrl: `https://github.com/${github}`
         });
       }
 
-      const namePattern = new RegExp(`${word}\\s*[:\\-]\\s*([A-Z][A-Za-z.'-]+(?:\\s+[A-Z][A-Za-z.'-]+){0,3})`);
+      const namePattern = new RegExp(String.raw`${word}\s*[:\-]\s*([A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?)\b`);
       const nameMatch = snippet.match(namePattern);
       if (nameMatch) {
-        results.push({ name: nameMatch[1].trim() });
+        const candidateName = nameMatch[1].trim();
+        if (isMeaningfulMentorName(candidateName)) {
+          results.push({ name: candidateName });
+        }
       }
 
       fromIndex = wordIndex + word.length;
@@ -270,13 +276,14 @@ function extractMentorMentions(text) {
 function dedupeMentors(mentors) {
   const seen = new Set();
   return mentors.filter((mentor) => {
-    const key = mentor.github
-      ? `github:${mentor.github.toLowerCase()}`
-      : mentor.githubUrl
-        ? `url:${mentor.githubUrl.toLowerCase()}`
-        : mentor.name
-          ? `name:${mentor.name.toLowerCase()}`
-          : null;
+    let key = null;
+    if (mentor.github) {
+      key = `github:${mentor.github.toLowerCase()}`;
+    } else if (mentor.githubUrl) {
+      key = `url:${mentor.githubUrl.toLowerCase()}`;
+    } else if (mentor.name) {
+      key = `name:${mentor.name.toLowerCase()}`;
+    }
 
     if (!key || seen.has(key)) return false;
     seen.add(key);
@@ -294,8 +301,25 @@ function isMeaningfulMentorName(name) {
   if (!value) return false;
   if (value.length < 3) return false;
   const normalized = value.toLowerCase();
-  const genericNames = new Set(['all', 'mentor', 'mentors', 'contact', 'contacts', 'maintainer', 'maintainers']);
-  return !genericNames.has(normalized);
+  if (STOPWORD_NAMES.has(normalized)) return false;
+  // Check all tokens (including hyphenated) for stopwords
+  const allTokens = value.toLowerCase().split(/[\s\-]+/);
+  for (const token of allTokens) {
+    if (STOPWORD_NAMES.has(token)) return false;
+  }
+  return true;
+}
+
+function isMeaningfulGitHubHandle(handle) {
+  if (!handle) return false;
+  if (handle.length < 4) return false;
+  const normalized = handle.toLowerCase();
+  if (GENERIC_GITHUB_HANDLES.has(normalized)) return false;
+  // Reject handles that look like org names (contain org suffixes or common library prefixes)
+  if (/(project|org|lib|tool|libs|framework|sdk)([-_]|$)/i.test(handle)) return false;
+  // Reject handles that start with 'lib' (common library naming convention)
+  if (/^lib[a-z0-9]/i.test(handle)) return false;
+  return true;
 }
 
 function applyTip(entry) {
@@ -367,7 +391,7 @@ function extractMentors(html, orgInput, options = {}) {
     mentors.push(...extractMentorMentions(pageText));
   }
   entry.mentors = dedupeMentors(mentors)
-    .filter((mentor) => mentor.github || isMeaningfulMentorName(mentor.name))
+    .filter((mentor) => (mentor.github && isMeaningfulGitHubHandle(mentor.github)) || isMeaningfulMentorName(mentor.name))
     .map((mentor) => ({
       name: mentor.name || '',
       github: mentor.github || '',
@@ -378,6 +402,18 @@ function extractMentors(html, orgInput, options = {}) {
   applyTip(entry);
   finalizeStatus(entry);
   return entry;
+}
+
+function loadExistingMentorsData() {
+  try {
+    if (fs.existsSync(OUTPUT_PATH)) {
+      const data = fs.readFileSync(OUTPUT_PATH, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.warn(`⚠️  Could not load existing mentors data: ${error.message}`);
+  }
+  return {};
 }
 
 async function extractForOrg(org, fetchedAt) {
@@ -416,9 +452,14 @@ async function main() {
 
   console.log(`🚀 Extracting mentor contact data for ${targets.length} orgs`);
 
-  const results = {};
-  for (const org of ORGS) {
-    results[org.name] = buildBaseEntry(org, fetchedAt);
+  // Load existing data to preserve non-target orgs during partial runs
+  const results = loadExistingMentorsData();
+  
+  // Initialize only target orgs (new ones won't be in existing data)
+  for (const org of targets) {
+    if (!results[org.name]) {
+      results[org.name] = buildBaseEntry(org, fetchedAt);
+    }
   }
 
   for (let i = 0; i < targets.length; i += BATCH_SIZE) {

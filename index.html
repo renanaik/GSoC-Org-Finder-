@@ -289,7 +289,7 @@
     /* Dark mode - Tech tags */
     .dark .tech-tag { background: #27272a; color: #d4d4d8; border-color: #3f3f46; }
     .dark .fit-tag { background: #1e293b; color: #93c5fd; border-color: #334155; }
-    .dark .mentor-link-chip { background: rgba(249,115,22,0.14); color: #fdba74; border-color: rgba(249,115,22,0.35); }
+    .dark .mentor-link-chip { background: rgba(249,115,22,0.18); color: #ffddb8; border-color: rgba(255,186,120,0.45); }
     .dark .mentor-handle-chip { background: #27272a; color: #d4d4d8; border-color: #3f3f46; }
     .dark .mentor-card, .dark .mentor-empty { background:#18181b; border-color:#3f3f46; }
 
@@ -1431,9 +1431,30 @@
     }).join('');
   }
 
+  function buildMentorPreviewChips(mentorPreview) {
+    if (mentorPreview.length === 0) {
+      return '<p class="text-sm text-zinc-600">No mentor handles parsed yet.</p>';
+    }
+
+    const chips = mentorPreview.map((mentor) => {
+      if (mentor.githubUrl) {
+        return `<a class="mentor-handle-chip" href="${escapeHtml(mentor.githubUrl)}" target="_blank" rel="noopener noreferrer"><span>🐙</span><span>${escapeHtml(mentor.displayLabel)}</span></a>`;
+      }
+
+      return `<span class="mentor-handle-chip"><span>👤</span><span>${escapeHtml(mentor.displayLabel)}</span></span>`;
+    }).join('');
+
+    return `<div class="flex flex-wrap gap-2">${chips}</div>`;
+  }
+
   function renderMentorContactSection(org) {
     const container = document.getElementById('mMentorSection');
     if (!container) return;
+
+    if (mentorDataState === 'idle' || mentorDataState === 'loading') {
+      container.innerHTML = '<p class="text-sm text-zinc-500">Loading mentor contact data...</p>';
+      return;
+    }
 
     const entry = getMentorEntry(org.name);
     if (!entry) {
@@ -1483,9 +1504,10 @@
     }
 
     if (sections.length === 0) {
-      const message = entry.status === 'fetch-failed'
-        ? 'Mentor data unavailable right now.'
-        : 'No contact info parsed yet.';
+      let message = 'No contact info parsed yet.';
+      if (entry.status === 'fetch-failed') {
+        message = 'Mentor data unavailable right now.';
+      }
       container.innerHTML = `
         <div class="rounded-2xl border border-dashed border-zinc-200 p-5">
           <p class="text-sm text-zinc-600 mb-3">${message}</p>
@@ -1531,7 +1553,7 @@
           <p class="text-sm text-zinc-600">The cached mentor snapshot could not be loaded. Please try again later.</p>
         </div>
       `;
-      if (lastUpdatedEl) lastUpdatedEl.textContent = 'Last updated: unavailable';
+      if (lastUpdatedEl?.textContent !== undefined) lastUpdatedEl.textContent = 'Last updated: unavailable';
       return;
     }
 
@@ -1539,7 +1561,7 @@
     const channelFilter = document.getElementById('mentorChannelFilter')?.value || 'all';
     const records = getMentorFinderRecords();
     const lastFetched = records.map((record) => record.entry.lastFetched).find(Boolean);
-    if (lastUpdatedEl) {
+    if (lastUpdatedEl?.textContent !== undefined) {
       lastUpdatedEl.textContent = formatRelativeRefresh(lastFetched);
     }
 
@@ -1575,6 +1597,19 @@
           ...mentor,
           displayLabel: mentor.github ? `@${mentor.github}` : mentor.name
         }));
+      const mentorPreviewHtml = buildMentorPreviewChips(mentorPreview);
+      const primaryType = primary?.type || 'Not specified';
+      let statusClass = 'bg-red-100 text-red-700';
+      if (entry.status === 'ok') {
+        statusClass = 'bg-green-100 text-green-700';
+      } else if (entry.status === 'no-contact-found') {
+        statusClass = 'bg-zinc-100 text-zinc-600';
+      }
+
+      const contactLabel = entry.status === 'ok' ? 'Contact' : 'Ideas page';
+      const helperText = entry.status === 'ok'
+        ? 'Ideas page remains available from the org modal.'
+        : 'Use the ideas page to find the latest contact guidance.';
 
       let bodyHtml = '';
       if (entry.status === 'ok') {
@@ -1585,11 +1620,9 @@
         bodyHtml = `
           <div class="space-y-3">
             <div class="flex flex-wrap gap-2">${buildChannelChips(channelLinks.slice(0, 2))}</div>
-            ${mentorPreview.length > 0 ? `<div class="flex flex-wrap gap-2">${mentorPreview.map((mentor) => mentor.githubUrl
-              ? `<a class="mentor-handle-chip" href="${escapeHtml(mentor.githubUrl)}" target="_blank" rel="noopener noreferrer"><span>🐙</span><span>${escapeHtml(mentor.displayLabel)}</span></a>`
-              : `<span class="mentor-handle-chip"><span>👤</span><span>${escapeHtml(mentor.displayLabel)}</span></span>`).join('')}</div>` : '<p class="text-sm text-zinc-600">No mentor handles parsed yet.</p>'}
+            ${mentorPreviewHtml}
             <div class="text-sm text-zinc-600">
-              <p><strong class="text-zinc-900">Primary channel:</strong> ${escapeHtml(primary ? primary.type : 'Not specified')}</p>
+              <p><strong class="text-zinc-900">Primary channel:</strong> ${escapeHtml(primaryType)}</p>
             </div>
             ${entry.tip ? `<p class="text-sm text-zinc-600 line-clamp-3">${escapeHtml(entry.tip)}</p>` : ''}
           </div>
@@ -1601,7 +1634,6 @@
       }
 
       const contactHref = primary?.url || org.ideas || `https://github.com/${org.github}`;
-      const ideasHref = org.ideas || `https://github.com/${org.github}`;
 
       return `
         <article class="mentor-card">
@@ -1610,12 +1642,12 @@
               <p class="text-[10px] font-label uppercase tracking-widest text-primary mb-1">${escapeHtml(org.cat)}</p>
               <h3 class="font-headline text-xl font-bold text-zinc-900">${escapeHtml(org.name)}</h3>
             </div>
-            <span class="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-full ${entry.status === 'ok' ? 'bg-green-100 text-green-700' : entry.status === 'no-contact-found' ? 'bg-zinc-100 text-zinc-600' : 'bg-red-100 text-red-700'}">${escapeHtml(entry.status)}</span>
+            <span class="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-full ${statusClass}">${escapeHtml(entry.status)}</span>
           </div>
           ${bodyHtml}
           <div class="mt-5 pt-4 border-t border-zinc-100">
-            <a href="${escapeHtml(contactHref)}" target="_blank" rel="noopener noreferrer" class="mentor-link-chip"><span>📡</span><span>${entry.status === 'ok' ? 'Contact' : 'Ideas page'}</span></a>
-            <p class="text-xs text-zinc-500 mt-3">${entry.status === 'ok' ? 'Ideas page remains available from the org modal.' : 'Use the ideas page to find the latest contact guidance.'}</p>
+            <a href="${escapeHtml(contactHref)}" target="_blank" rel="noopener noreferrer" class="mentor-link-chip"><span>📡</span><span>${contactLabel}</span></a>
+            <p class="text-xs text-zinc-500 mt-3">${helperText}</p>
           </div>
         </article>
       `;
