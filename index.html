@@ -556,7 +556,7 @@
       </div>
       <!-- Surprise Button -->
       <div class="mb-8 sm:mb-10">
-        <button id="surpriseBtn" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-container text-white rounded-full text-sm font-bold hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2" aria-label="🎲 Surprise Me! — random organization">
+        <button id="surpriseBtn" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-container text-white rounded-full text-sm font-bold hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2" aria-label="Surprise me with a random organization">
           <span class="material-symbols-outlined text-sm">casino</span>
           🎲 Surprise Me!
         </button>
@@ -1742,6 +1742,26 @@ if(org.ideas){
     
     document.getElementById('orgModal').classList.add('open');
     document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('orgModal').classList.remove('open');
+    document.body.style.overflow = 'auto';
+  }
+
+  function openRandomOrg() {
+    const orgsToUse = filteredOrgs.length > 0 ? filteredOrgs : ORGS;
+    
+    if (!orgsToUse.length) {
+      alert('No organizations match your filters — try clearing some!');
+      return;
+    }
+
+    const randomIdx = Math.floor(Math.random() * orgsToUse.length);
+    const randomOrg = orgsToUse[randomIdx];
+    
+    openModal(randomOrg.name);
+  }
 
   // Filters — all conditions are additive (chip + language pills + search + dropdowns compose)
   function applyFilters() {
