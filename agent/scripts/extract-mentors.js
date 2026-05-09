@@ -87,9 +87,32 @@ function decodeHtmlEntities(value) {
 }
 
 function stripHtml(value) {
-  return decodeHtmlEntities(String(value || '')
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+  let text = String(value || '');
+
+  for (const tagName of ['script', 'style']) {
+    let start = 0;
+    while (start < text.length) {
+      const openIndex = text.toLowerCase().indexOf(`<${tagName}`, start);
+      if (openIndex === -1) break;
+
+      const openEnd = text.indexOf('>', openIndex);
+      if (openEnd === -1) {
+        text = text.slice(0, openIndex);
+        break;
+      }
+
+      const closeIndex = text.toLowerCase().indexOf(`</${tagName}>`, openEnd + 1);
+      if (closeIndex === -1) {
+        text = `${text.slice(0, openIndex)} ${text.slice(openEnd + 1)}`;
+        break;
+      }
+
+      text = `${text.slice(0, openIndex)} ${text.slice(closeIndex + tagName.length + 3)}`;
+      start = openIndex + 1;
+    }
+  }
+
+  return decodeHtmlEntities(text
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' '))
     .trim();
@@ -109,21 +132,34 @@ function fetchWithTimeout(url, options = {}) {
 
 function extractAnchorCandidates(html) {
   const anchors = [];
-  const anchorRegex = /<a\b[^>]*href\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a>/gi;
-  let match;
+  const lowerHtml = html.toLowerCase();
+  let searchIndex = 0;
 
-  while ((match = anchorRegex.exec(html)) !== null) {
-    const href = match[1] || match[2] || match[3] || '';
-    const label = stripHtml(match[4]);
-    const anchorHtml = match[0];
-    const before = html.slice(Math.max(0, match.index - 180), match.index);
-    const after = html.slice(anchorRegex.lastIndex, anchorRegex.lastIndex + 180);
+  while (searchIndex < html.length) {
+    const anchorStart = lowerHtml.indexOf('<a', searchIndex);
+    if (anchorStart === -1) break;
+
+    const tagEnd = html.indexOf('>', anchorStart);
+    if (tagEnd === -1) break;
+
+    const anchorClose = lowerHtml.indexOf('</a>', tagEnd + 1);
+    if (anchorClose === -1) break;
+
+    const anchorHtml = html.slice(anchorStart, anchorClose + 4);
+    const tagText = html.slice(anchorStart, tagEnd + 1);
+    const hrefMatch = tagText.match(/href\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+    const href = hrefMatch ? (hrefMatch[1] || hrefMatch[2] || hrefMatch[3] || '') : '';
+    const label = stripHtml(html.slice(tagEnd + 1, anchorClose));
+    const before = html.slice(Math.max(0, anchorStart - 180), anchorStart);
+    const after = html.slice(anchorClose + 4, anchorClose + 184);
     anchors.push({
       href,
       label,
       anchorHtml,
       context: stripHtml(`${before} ${anchorHtml} ${after}`)
     });
+
+    searchIndex = anchorClose + 4;
   }
 
   return anchors;
