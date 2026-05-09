@@ -185,6 +185,10 @@
     .tech-tags, .fit-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .tech-tag { background: #f3f4f6; color: #4b5563; font-size: 0.7rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; }
     .fit-tag { background: #eff6ff; color: #2563eb; font-size: 0.7rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 0.5rem; border: 1px solid #dbeafe; }
+    .mentor-link-chip { display:inline-flex; align-items:center; gap:.45rem; background:#fff7ed; color:#9d4300; border:1px solid #fed7aa; border-radius:999px; padding:.45rem .75rem; font-size:.75rem; font-weight:700; }
+    .mentor-handle-chip { display:inline-flex; align-items:center; gap:.35rem; background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:999px; padding:.4rem .7rem; font-size:.75rem; font-weight:600; }
+    .mentor-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:1rem; padding:1.25rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+    .mentor-empty { background:#ffffff; border:1px solid #e5e7eb; border-radius:1rem; padding:2rem; text-align:center; }
 
     .timeline-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .timeline-grid span { font-size: 0.75rem; font-weight: 500; color: #666; background: #fff; border: 1px solid #eee; padding: 0.3rem 0.7rem; border-radius: 0.5rem; }
@@ -219,7 +223,7 @@
     html { scroll-behavior: smooth; }
     
     /* Scroll offset for fixed header */
-    #timeline, #orgs, #guide, #watchlist, #issues {
+    #timeline, #orgs, #guide, #watchlist, #issues, #mentors {
       scroll-margin-top: 80px;
     }
 
@@ -285,6 +289,16 @@
     /* Dark mode - Tech tags */
     .dark .tech-tag { background: #27272a; color: #d4d4d8; border-color: #3f3f46; }
     .dark .fit-tag { background: #1e293b; color: #93c5fd; border-color: #334155; }
+    .dark .mentor-link-chip { background: rgba(249,115,22,0.14); color: #fdba74; border-color: rgba(249,115,22,0.35); }
+    .dark .mentor-handle-chip { background: #27272a; color: #d4d4d8; border-color: #3f3f46; }
+    .dark .mentor-card, .dark .mentor-empty { background:#18181b; border-color:#3f3f46; }
+
+    @media (max-width: 640px) {
+      .modal-header { padding: 2rem 1.5rem 1rem; }
+      .modal-body { padding: 0 1.5rem 2rem; }
+      .modal-footer { padding: 1.5rem; flex-direction: column; }
+      .modal-cta { width: 100%; }
+    }
     
     /* Dark mode - Modal */
     .dark .modal { background: #18181b; }
@@ -445,6 +459,7 @@
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#guide">Guide</a>
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#watchlist">Watchlist</a>
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#issues">Issues</a>
+        <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#mentors">Mentors</a>
         <a class="text-zinc-600 hover:text-zinc-900 transition-colors" href="#timeline">Timeline</a>
       </nav>
     </div>
@@ -520,6 +535,10 @@
       <a href="#issues" onclick="setActiveMenu(this)" class="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-700 hover:bg-zinc-100 font-medium text-sm transition-colors" data-section="issues">
         <span class="material-symbols-outlined text-lg">bug_report</span>
         Issues
+      </a>
+      <a href="#mentors" onclick="setActiveMenu(this)" class="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-700 hover:bg-zinc-100 font-medium text-sm transition-colors" data-section="mentors">
+        <span class="material-symbols-outlined text-lg">group</span>
+        Mentors
       </a>
       <a href="#timeline" onclick="setActiveMenu(this)" class="mobile-menu-link flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-700 hover:bg-zinc-100 font-medium text-sm transition-colors" data-section="timeline">
         <span class="material-symbols-outlined text-lg">schedule</span>
@@ -777,6 +796,52 @@
   </div>
 </section>
 
+<!-- ═══════════════════ MENTOR FINDER ═══════════════════ -->
+<section id="mentors" class="py-20 px-6 bg-surface-container-low">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-12">
+      <span class="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Mentor Outreach</span>
+      <h2 class="text-4xl md:text-5xl font-extrabold font-headline tracking-tighter mt-2">Mentor Finder</h2>
+      <p class="text-zinc-600 mt-4 max-w-3xl">Pre-fetched contact channels and conservative mentor handles from org ideas pages, so you can find where to introduce yourself before proposal season gets busy.</p>
+    </div>
+
+    <div class="bg-white border border-zinc-100 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 rounded-full bg-orange-500 pulse-dot"></div>
+        <div>
+          <p class="font-bold text-zinc-900 text-sm">Cached mentor contact data</p>
+          <p class="text-xs text-zinc-600">Generated offline by the project workflow to keep scraping out of the browser.</p>
+        </div>
+      </div>
+      <span id="mentorLastUpdated" class="text-xs font-mono text-zinc-500 ml-auto">Last updated: pending refresh</span>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-zinc-100 p-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px] gap-4">
+        <label class="relative block">
+          <span class="material-symbols-outlined absolute left-3 top-3 text-zinc-400 text-sm">search</span>
+          <input id="mentorSearchInput" type="text" placeholder="Search org name or mentor GitHub handle..." class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-none rounded-xl text-sm focus:ring-2 focus:ring-primary" />
+        </label>
+        <select id="mentorChannelFilter" class="bg-surface-container-low border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary text-zinc-700 px-4">
+          <option value="all">All channels</option>
+          <option value="Slack">Slack</option>
+          <option value="Zulip">Zulip</option>
+          <option value="Discord">Discord</option>
+          <option value="Matrix">Matrix</option>
+          <option value="IRC">IRC</option>
+          <option value="Mailing list">Mailing list</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="mentorGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div class="col-span-full bg-white rounded-2xl border border-zinc-100 p-8 text-center">
+        <p class="text-sm text-zinc-500">Loading mentor contact data...</p>
+      </div>
+    </div>
+  </div>
+</section>
+ 
 <!-- ═══════════════════ CONTRIBUTOR GUIDE ═══════════════════ -->
 <section id="guide" class="py-20 px-6 max-w-7xl mx-auto">
   <div class="mb-12">
@@ -966,6 +1031,11 @@
 
       <div class="section-title">Participation Timeline</div>
       <div class="timeline-grid" id="mTimeline"></div>
+
+      <div class="section-title">Mentors &amp; Contact</div>
+      <div id="mMentorSection" class="space-y-4">
+        <p class="text-sm text-zinc-500">Loading mentor contact data...</p>
+      </div>
     </div>
     <div class="modal-footer">
       <a href="#" target="_blank" id="mIdeasBtn" class="modal-cta modal-ideas-link flex items-center justify-center gap-2">
@@ -1081,7 +1151,7 @@
 
   // Update active state based on scroll position
   function updateActiveSection() {
-    const sections = ['orgs', 'guide', 'watchlist', 'issues', 'timeline'];
+    const sections = ['orgs', 'guide', 'watchlist', 'issues', 'mentors', 'timeline'];
     const scrollPosition = window.scrollY + 100; // Offset for fixed header
     
     let currentSection = 'orgs'; // Default
@@ -1139,11 +1209,29 @@
   let visibleCount = 12;
 
   let filteredOrgs = [...ORGS];
+  let MENTOR_DATA = {};
+  let mentorDataState = 'idle';
   let compareList = [];
   const bookmarkedSet = new Set(JSON.parse(localStorage.getItem('bookmarks') || '[]'));
   const selectedLanguages = new Set();
   let matchAllLanguages = false;
   let activeChip = null; // tracks the active quick-filter chip key ('veterans' | 'newcomers' | 'low-competition' | 'high-competition' | 'bookmarked' | 'active' | null)
+  const CHANNEL_ICONS = {
+    Slack: '💬',
+    Zulip: '💬',
+    Discord: '🎮',
+    Matrix: '🔗',
+    IRC: '🖥️',
+    'Mailing list': '📧'
+  };
+  const CONTACT_TIPS = {
+    Slack: 'Join and say hi in the GSoC channel before DMing mentors.',
+    Discord: 'Introduce yourself in the public channel before asking project-specific questions.',
+    Zulip: 'Post a new topic in the GSoC stream with your background and interest.',
+    Matrix: "Say hello in the public room and mention the project area you're exploring.",
+    IRC: 'Stay in the channel for a while; replies are often asynchronous.',
+    'Mailing list': "Send a short intro email with your background and the idea you're interested in."
+  };
   const LANGUAGE_ALIASES = {
     'python': ['python'],
     'javascript': ['javascript', 'js'],
@@ -1268,6 +1356,296 @@
     renderSelectedLanguages();
     applyFilters();
   };
+
+  function createDefaultMentorEntry(org) {
+    return {
+      org: org.name,
+      ideasUrl: org.ideas || '',
+      channels: [],
+      mentors: [],
+      mailingLists: [],
+      tip: '',
+      status: 'fetch-failed',
+      lastFetched: ''
+    };
+  }
+
+  function getMentorEntry(name) {
+    const org = ORGS.find(item => item.name === name);
+    if (!org) return null;
+    return MENTOR_DATA[name] || createDefaultMentorEntry(org);
+  }
+
+  function formatRelativeRefresh(isoString) {
+    if (!isoString) return 'Last updated: unavailable';
+    const timestamp = new Date(isoString).getTime();
+    if (Number.isNaN(timestamp)) return 'Last updated: unavailable';
+    const minutes = Math.max(1, Math.floor((Date.now() - timestamp) / 60000));
+    if (minutes < 60) return `Last updated: ${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 48) return `Last updated: ${hours} hour${hours === 1 ? '' : 's'} ago`;
+    const days = Math.floor(hours / 24);
+    return `Last updated: ${days} day${days === 1 ? '' : 's'} ago`;
+  }
+
+  function getPrimaryMentorContact(entry) {
+    if (entry.channels.length > 0) return entry.channels[0];
+    if (entry.mailingLists.length > 0) return entry.mailingLists[0];
+    return null;
+  }
+
+  function buildChannelChips(records) {
+    return records.map((record) => `
+      <a class="mentor-link-chip" href="${escapeHtml(record.url)}" target="_blank" rel="noopener noreferrer">
+        <span>${CHANNEL_ICONS[record.type] || '💬'}</span>
+        <span>${escapeHtml(record.label || record.type)}</span>
+      </a>
+    `).join('');
+  }
+
+  function buildMentorChips(mentors) {
+    return mentors.map((mentor) => {
+      if (mentor.githubUrl) {
+        const label = mentor.github ? `@${mentor.github}` : (mentor.name || mentor.githubUrl);
+        return `
+          <a class="mentor-handle-chip" href="${escapeHtml(mentor.githubUrl)}" target="_blank" rel="noopener noreferrer">
+            <span>🐙</span>
+            <span>${escapeHtml(label)}</span>
+          </a>
+        `;
+      }
+
+      return `
+        <span class="mentor-handle-chip">
+          <span>👤</span>
+          <span>${escapeHtml(mentor.name || 'Mentor')}</span>
+        </span>
+      `;
+    }).join('');
+  }
+
+  function renderMentorContactSection(org) {
+    const container = document.getElementById('mMentorSection');
+    if (!container) return;
+
+    const entry = getMentorEntry(org.name);
+    if (!entry) {
+      container.innerHTML = '<p class="text-sm text-zinc-500">Mentor data unavailable right now.</p>';
+      return;
+    }
+
+    const fallbackIdeasLink = org.ideas
+      ? `<a href="${escapeHtml(org.ideas)}" target="_blank" rel="noopener noreferrer" class="mentor-link-chip"><span>💡</span><span>Visit ideas page</span></a>`
+      : '';
+
+    const sections = [];
+    if (entry.status === 'ok' && entry.channels.length > 0) {
+      sections.push(`
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">Channels</p>
+          <div class="flex flex-wrap gap-2">${buildChannelChips(entry.channels)}</div>
+        </div>
+      `);
+    }
+
+    if (entry.status === 'ok' && entry.mentors.length > 0) {
+      sections.push(`
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">Mentors</p>
+          <div class="flex flex-wrap gap-2">${buildMentorChips(entry.mentors)}</div>
+        </div>
+      `);
+    }
+
+    if (entry.status === 'ok' && entry.mailingLists.length > 0) {
+      sections.push(`
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">Mailing Lists</p>
+          <div class="flex flex-wrap gap-2">${buildChannelChips(entry.mailingLists.map((list) => ({ ...list, type: 'Mailing list' })))}</div>
+        </div>
+      `);
+    }
+
+    if (entry.tip) {
+      sections.push(`
+        <div class="rounded-2xl bg-orange-50 border border-orange-100 p-4">
+          <p class="text-xs font-bold uppercase tracking-widest text-primary mb-1">Contact Tip</p>
+          <p class="text-sm text-zinc-700">${escapeHtml(entry.tip)}</p>
+        </div>
+      `);
+    }
+
+    if (sections.length === 0) {
+      const message = entry.status === 'fetch-failed'
+        ? 'Mentor data unavailable right now.'
+        : 'No contact info parsed yet.';
+      container.innerHTML = `
+        <div class="rounded-2xl border border-dashed border-zinc-200 p-5">
+          <p class="text-sm text-zinc-600 mb-3">${message}</p>
+          <div class="flex flex-wrap gap-2">${fallbackIdeasLink || '<span class="text-xs text-zinc-400">No ideas page listed.</span>'}</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="space-y-4">
+        ${sections.join('')}
+        ${fallbackIdeasLink ? `<div class="flex flex-wrap gap-2">${fallbackIdeasLink}</div>` : ''}
+      </div>
+    `;
+  }
+
+  function getMentorFinderRecords() {
+    return ORGS.map((org) => ({
+      org,
+      entry: getMentorEntry(org.name)
+    }));
+  }
+
+  function renderMentorFinder() {
+    const grid = document.getElementById('mentorGrid');
+    const lastUpdatedEl = document.getElementById('mentorLastUpdated');
+    if (!grid) return;
+
+    if (mentorDataState === 'loading' || mentorDataState === 'idle') {
+      grid.innerHTML = `
+        <div class="col-span-full mentor-empty">
+          <p class="text-sm text-zinc-500">Loading mentor contact data...</p>
+        </div>
+      `;
+      return;
+    }
+
+    if (mentorDataState === 'error') {
+      grid.innerHTML = `
+        <div class="col-span-full mentor-empty">
+          <p class="font-bold text-zinc-900 mb-2">Mentor data unavailable right now.</p>
+          <p class="text-sm text-zinc-600">The cached mentor snapshot could not be loaded. Please try again later.</p>
+        </div>
+      `;
+      if (lastUpdatedEl) lastUpdatedEl.textContent = 'Last updated: unavailable';
+      return;
+    }
+
+    const search = (document.getElementById('mentorSearchInput')?.value || '').trim().toLowerCase();
+    const channelFilter = document.getElementById('mentorChannelFilter')?.value || 'all';
+    const records = getMentorFinderRecords();
+    const lastFetched = records.map((record) => record.entry.lastFetched).find(Boolean);
+    if (lastUpdatedEl) {
+      lastUpdatedEl.textContent = formatRelativeRefresh(lastFetched);
+    }
+
+    const filteredRecords = records.filter(({ org, entry }) => {
+      const searchHaystack = [
+        org.name,
+        ...(entry.mentors || []).flatMap((mentor) => [mentor.name || '', mentor.github || ''])
+      ].join(' ').toLowerCase();
+
+      const matchesSearch = !search || searchHaystack.includes(search);
+      const allContacts = [...(entry.channels || []), ...(entry.mailingLists || []).map((list) => ({ ...list, type: 'Mailing list' }))];
+      const matchesChannel = channelFilter === 'all' || allContacts.some((contact) => contact.type === channelFilter);
+
+      return matchesSearch && matchesChannel;
+    });
+
+    if (filteredRecords.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full mentor-empty">
+          <p class="font-bold text-zinc-900 mb-2">No mentor matches found.</p>
+          <p class="text-sm text-zinc-600">Try a different org name, GitHub handle, or channel filter.</p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filteredRecords.map(({ org, entry }) => {
+      const primary = getPrimaryMentorContact(entry);
+      const mentorPreview = entry.mentors
+        .slice(0, 3)
+        .filter((mentor) => mentor.github || mentor.name)
+        .map((mentor) => ({
+          ...mentor,
+          displayLabel: mentor.github ? `@${mentor.github}` : mentor.name
+        }));
+
+      let bodyHtml = '';
+      if (entry.status === 'ok') {
+        const channelLinks = [
+          ...(entry.channels || []),
+          ...(entry.mailingLists || []).map((list) => ({ ...list, type: 'Mailing list' }))
+        ];
+        bodyHtml = `
+          <div class="space-y-3">
+            <div class="flex flex-wrap gap-2">${buildChannelChips(channelLinks.slice(0, 2))}</div>
+            ${mentorPreview.length > 0 ? `<div class="flex flex-wrap gap-2">${mentorPreview.map((mentor) => mentor.githubUrl
+              ? `<a class="mentor-handle-chip" href="${escapeHtml(mentor.githubUrl)}" target="_blank" rel="noopener noreferrer"><span>🐙</span><span>${escapeHtml(mentor.displayLabel)}</span></a>`
+              : `<span class="mentor-handle-chip"><span>👤</span><span>${escapeHtml(mentor.displayLabel)}</span></span>`).join('')}</div>` : '<p class="text-sm text-zinc-600">No mentor handles parsed yet.</p>'}
+            <div class="text-sm text-zinc-600">
+              <p><strong class="text-zinc-900">Primary channel:</strong> ${escapeHtml(primary ? primary.type : 'Not specified')}</p>
+            </div>
+            ${entry.tip ? `<p class="text-sm text-zinc-600 line-clamp-3">${escapeHtml(entry.tip)}</p>` : ''}
+          </div>
+        `;
+      } else if (entry.status === 'no-contact-found') {
+        bodyHtml = '<p class="text-sm text-zinc-600">No mentor contact info parsed yet for this org.</p>';
+      } else {
+        bodyHtml = '<p class="text-sm text-zinc-600">Mentor data unavailable right now.</p>';
+      }
+
+      const contactHref = primary?.url || org.ideas || `https://github.com/${org.github}`;
+      const ideasHref = org.ideas || `https://github.com/${org.github}`;
+
+      return `
+        <article class="mentor-card">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <p class="text-[10px] font-label uppercase tracking-widest text-primary mb-1">${escapeHtml(org.cat)}</p>
+              <h3 class="font-headline text-xl font-bold text-zinc-900">${escapeHtml(org.name)}</h3>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-full ${entry.status === 'ok' ? 'bg-green-100 text-green-700' : entry.status === 'no-contact-found' ? 'bg-zinc-100 text-zinc-600' : 'bg-red-100 text-red-700'}">${escapeHtml(entry.status)}</span>
+          </div>
+          ${bodyHtml}
+          <div class="mt-5 pt-4 border-t border-zinc-100">
+            <a href="${escapeHtml(contactHref)}" target="_blank" rel="noopener noreferrer" class="mentor-link-chip"><span>📡</span><span>${entry.status === 'ok' ? 'Contact' : 'Ideas page'}</span></a>
+            <p class="text-xs text-zinc-500 mt-3">${entry.status === 'ok' ? 'Ideas page remains available from the org modal.' : 'Use the ideas page to find the latest contact guidance.'}</p>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    attachOrgCardListeners(grid);
+  }
+
+  async function loadMentorData() {
+    mentorDataState = 'loading';
+    renderMentorFinder();
+
+    try {
+      const res = await fetch(`/data/mentors.json?v=${Date.now()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error('Invalid mentors.json payload');
+      }
+      MENTOR_DATA = data;
+      mentorDataState = 'loaded';
+    } catch (error) {
+      console.error('Mentor data load failed:', error);
+      MENTOR_DATA = {};
+      mentorDataState = 'error';
+    }
+
+    renderMentorFinder();
+    const openModalEl = document.getElementById('orgModal');
+    if (openModalEl?.classList.contains('open')) {
+      const orgName = document.querySelector('#mHeader h2')?.textContent;
+      if (orgName) {
+        const org = ORGS.find((item) => item.name === orgName);
+        if (org) renderMentorContactSection(org);
+      }
+    }
+  }
 
   // Dynamic timeline milestones
   const MILESTONES = [
@@ -1732,7 +2110,8 @@ if(org.ideas){
   };
   document.getElementById('mIdeasBtn').after(copyBtn);
 }
-    
+    renderMentorContactSection(org);
+     
     document.getElementById('orgModal').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -1793,6 +2172,8 @@ if(org.ideas){
   document.getElementById('searchInput').addEventListener('input', applyFilters);
   document.getElementById('categoryFilter').addEventListener('change', applyFilters);
   document.getElementById('complexityFilter').addEventListener('change', applyFilters);
+  document.getElementById('mentorSearchInput')?.addEventListener('input', renderMentorFinder);
+  document.getElementById('mentorChannelFilter')?.addEventListener('change', renderMentorFinder);
   document.getElementById('matchAllLanguagesToggle')?.addEventListener('change', (e) => {
     matchAllLanguages = e.target.checked;
     // keep global in sync for any external code expecting `matchAllLanguages`
@@ -1989,6 +2370,7 @@ if(org.ideas){
   renderSelectedLanguages();
   renderOrgs();
   renderWatchlist();
+  loadMentorData();
   renderGoodFirstIssues();
   renderCompare();
   const helpModal = document.getElementById('helpModal');

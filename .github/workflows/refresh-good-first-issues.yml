@@ -50,6 +50,7 @@ jobs:
           mkdir -p data
 
           [ -f data/issues.json ] || echo "{}" > data/issues.json
+          [ -f data/mentors.json ] || echo "{}" > data/mentors.json
           [ -f data/last-updated.json ] || echo "{}" > data/last-updated.json
 
       # ─────────────────────────────────────────────
@@ -59,6 +60,9 @@ jobs:
         run: node agent/scripts/fetch-issues.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract mentor contacts
+        run: node agent/scripts/extract-mentors.js
 
       # ─────────────────────────────────────────────
       # Optional UI cache generation
@@ -132,6 +136,7 @@ jobs:
             This PR updates:
 
             - good first issue dataset
+            - mentor contact dataset
             - refresh timestamps
 
             Generated automatically by GitHub Actions.
@@ -143,4 +148,5 @@ jobs:
 
           add-paths: |
             data/issues.json
+            data/mentors.json
             data/last-updated.json

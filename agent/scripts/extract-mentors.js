@@ -1,0 +1,430 @@
+/* eslint-env node */
+
+const fs = require('fs');
+const path = require('path');
+const ORGS = require('../../src/js/org.js');
+
+const CONTACT_TIPS = {
+  Slack: 'Join and say hi in the GSoC channel before DMing mentors.',
+  Discord: 'Introduce yourself in the public channel before asking project-specific questions.',
+  Zulip: 'Post a new topic in the GSoC stream with your background and interest.',
+  Matrix: "Say hello in the public room and mention the project area you're exploring.",
+  IRC: 'Stay in the channel for a while; replies are often asynchronous.',
+  'Mailing list': "Send a short intro email with your background and the idea you're interested in."
+};
+
+const CHANNEL_MATCHERS = [
+  { type: 'Slack', match: (hostname) => hostname === 'slack.com' || hostname.endsWith('.slack.com') },
+  { type: 'Zulip', match: (hostname) => hostname === 'zulip.com' || hostname.endsWith('.zulip.com') },
+  { type: 'Matrix', match: (hostname) => hostname === 'matrix.to' || hostname.endsWith('.matrix.to') },
+  { type: 'IRC', match: (hostname) => hostname === 'irc.libera.chat' || hostname.endsWith('.irc.libera.chat') },
+  { type: 'Discord', match: (hostname) => hostname === 'discord.gg' || hostname.endsWith('.discord.gg') },
+  { type: 'Mailing list', match: (hostname) => hostname === 'groups.google.com' || hostname.includes('lists.') },
+];
+
+const REQUEST_TIMEOUT_MS = 15000;
+const BATCH_SIZE = 5;
+const BATCH_DELAY_MS = 1200;
+const OUTPUT_PATH = path.resolve(__dirname, '../../data/mentors.json');
+const DEFAULT_HEADERS = {
+  Accept: 'text/html,application/xhtml+xml',
+  'User-Agent': 'gsoc-org-finder-mentor-refresh'
+};
+const CONFIDENCE_REGEX = /\b(mentor|mentors|contact|contacts|maintainer|maintainers)\b/i;
+const CHANNEL_CONFIDENCE_REGEX = /\b(join|chat|channel|community|stream|forum|discussion|mailing|list|gsoc|mentor)\b/i;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function parseArgs(argv) {
+  const options = {
+    limit: null,
+    orgs: null
+  };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--limit' && argv[i + 1]) {
+      options.limit = Number(argv[i + 1]);
+      i += 1;
+    } else if (arg.startsWith('--limit=')) {
+      options.limit = Number(arg.split('=')[1]);
+    } else if (arg === '--org' && argv[i + 1]) {
+      options.orgs = argv[i + 1].split(',').map((value) => value.trim().toLowerCase()).filter(Boolean);
+      i += 1;
+    } else if (arg.startsWith('--org=')) {
+      options.orgs = arg.split('=')[1].split(',').map((value) => value.trim().toLowerCase()).filter(Boolean);
+    }
+  }
+
+  return options;
+}
+
+function buildBaseEntry(org, fetchedAt) {
+  return {
+    org: org.name,
+    ideasUrl: typeof org.ideas === 'string' ? org.ideas : '',
+    channels: [],
+    mentors: [],
+    mailingLists: [],
+    tip: '',
+    status: 'fetch-failed',
+    lastFetched: fetchedAt
+  };
+}
+
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&nbsp;/gi, ' ');
+}
+
+function stripHtml(value) {
+  return decodeHtmlEntities(String(value || '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' '))
+    .trim();
+}
+
+function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  return fetch(url, {
+    ...options,
+    signal: controller.signal
+  }).finally(() => {
+    clearTimeout(timeout);
+  });
+}
+
+function extractAnchorCandidates(html) {
+  const anchors = [];
+  const anchorRegex = /<a\b[^>]*href\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a>/gi;
+  let match;
+
+  while ((match = anchorRegex.exec(html)) !== null) {
+    const href = match[1] || match[2] || match[3] || '';
+    const label = stripHtml(match[4]);
+    const anchorHtml = match[0];
+    const before = html.slice(Math.max(0, match.index - 180), match.index);
+    const after = html.slice(anchorRegex.lastIndex, anchorRegex.lastIndex + 180);
+    anchors.push({
+      href,
+      label,
+      anchorHtml,
+      context: stripHtml(`${before} ${anchorHtml} ${after}`)
+    });
+  }
+
+  return anchors;
+}
+
+function normalizeHttpUrl(rawHref, baseUrl) {
+  try {
+    const url = new URL(rawHref, baseUrl);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return null;
+    }
+    if (url.hostname.toLowerCase() !== 'matrix.to') {
+      url.hash = '';
+    }
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function detectChannelType(urlString) {
+  try {
+    const hostname = new URL(urlString).hostname.toLowerCase();
+    const matched = CHANNEL_MATCHERS.find((matcher) => matcher.match(hostname));
+    return matched ? matched.type : null;
+  } catch {
+    return null;
+  }
+}
+
+function isMeaningfulLabel(label) {
+  if (!label) return false;
+  const normalized = label.trim().toLowerCase();
+  if (!normalized) return false;
+  if (normalized.startsWith('http://') || normalized.startsWith('https://') || normalized.startsWith('www.')) {
+    return false;
+  }
+  const genericLabels = new Set([
+    'here',
+    'link',
+    'click here',
+    'more',
+    'details',
+    'join',
+    'chat',
+    'server',
+    'group'
+  ]);
+  return !genericLabels.has(normalized);
+}
+
+function createChannelRecord(orgName, type, normalizedUrl, label) {
+  return {
+    type,
+    url: normalizedUrl,
+    label: isMeaningfulLabel(label) ? label.trim() : `${orgName} ${type}`
+  };
+}
+
+function isHighConfidenceChannel(type, normalizedUrl, anchor) {
+  const context = `${anchor.label || ''} ${anchor.context || ''}`.trim();
+  const lowerContext = context.toLowerCase();
+  const hostname = new URL(normalizedUrl).hostname.toLowerCase();
+
+  if (type === 'Mailing list' || type === 'Discord' || type === 'IRC') {
+    return true;
+  }
+
+  if (type === 'Slack') {
+    return hostname.endsWith('.slack.com') || CHANNEL_CONFIDENCE_REGEX.test(lowerContext);
+  }
+
+  if (type === 'Matrix') {
+    return normalizedUrl.includes('/#/') || normalizedUrl.includes('#/') || CHANNEL_CONFIDENCE_REGEX.test(lowerContext);
+  }
+
+  if (type === 'Zulip') {
+    const lowerUrl = normalizedUrl.toLowerCase();
+    return hostname.endsWith('.zulipchat.com')
+      || lowerUrl.includes('/development-community')
+      || lowerUrl.includes('/#narrow/')
+      || /\b(join|stream|zulipchat)\b/i.test(lowerContext);
+  }
+
+  return CHANNEL_CONFIDENCE_REGEX.test(lowerContext);
+}
+
+function isGitHubProfileUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+    if (url.hostname.toLowerCase() !== 'github.com') return null;
+    const segments = url.pathname.split('/').filter(Boolean);
+    if (segments.length !== 1) return null;
+    const username = segments[0];
+    if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(username)) return null;
+    return {
+      github: username,
+      githubUrl: `https://github.com/${username}`
+    };
+  } catch {
+    return null;
+  }
+}
+
+function extractMentorMentions(text) {
+  const results = [];
+  const lowered = text.toLowerCase();
+  const confidenceWords = ['mentor', 'mentors', 'contact', 'contacts', 'maintainer', 'maintainers'];
+
+  confidenceWords.forEach((word) => {
+    let fromIndex = 0;
+    while (fromIndex < lowered.length) {
+      const wordIndex = lowered.indexOf(word, fromIndex);
+      if (wordIndex === -1) break;
+      const snippet = text.slice(Math.max(0, wordIndex - 80), Math.min(text.length, wordIndex + 140));
+
+      const handleRegex = /(^|[\s(])@([a-z\d](?:[a-z\d-]{0,38}))/gi;
+      let handleMatch;
+      while ((handleMatch = handleRegex.exec(snippet)) !== null) {
+        const github = handleMatch[2];
+        results.push({
+          github,
+          githubUrl: `https://github.com/${github}`
+        });
+      }
+
+      const namePattern = new RegExp(`${word}\\s*[:\\-]\\s*([A-Z][A-Za-z.'-]+(?:\\s+[A-Z][A-Za-z.'-]+){0,3})`);
+      const nameMatch = snippet.match(namePattern);
+      if (nameMatch) {
+        results.push({ name: nameMatch[1].trim() });
+      }
+
+      fromIndex = wordIndex + word.length;
+    }
+  });
+
+  return results;
+}
+
+function dedupeMentors(mentors) {
+  const seen = new Set();
+  return mentors.filter((mentor) => {
+    const key = mentor.github
+      ? `github:${mentor.github.toLowerCase()}`
+      : mentor.githubUrl
+        ? `url:${mentor.githubUrl.toLowerCase()}`
+        : mentor.name
+          ? `name:${mentor.name.toLowerCase()}`
+          : null;
+
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function isHighConfidenceGitHubAnchor(anchor, githubProfile) {
+  const label = (anchor.label || '').trim().toLowerCase();
+  const context = (anchor.context || '').trim();
+  if (CONFIDENCE_REGEX.test(context)) {
+    return true;
+  }
+
+  if (label === `@${githubProfile.github.toLowerCase()}`) {
+    return true;
+  }
+
+  return false;
+}
+
+function isMeaningfulMentorName(name) {
+  const value = String(name || '').trim();
+  if (!value) return false;
+  if (value.length < 3) return false;
+  const normalized = value.toLowerCase();
+  const genericNames = new Set(['all', 'mentor', 'mentors', 'contact', 'contacts', 'maintainer', 'maintainers']);
+  return !genericNames.has(normalized);
+}
+
+function applyTip(entry) {
+  if (entry.channels.length > 0) {
+    entry.tip = CONTACT_TIPS[entry.channels[0].type] || '';
+    return;
+  }
+
+  if (entry.mailingLists.length > 0) {
+    entry.tip = CONTACT_TIPS['Mailing list'] || '';
+    return;
+  }
+
+  entry.tip = '';
+}
+
+function finalizeStatus(entry) {
+  if (entry.channels.length > 0 || entry.mailingLists.length > 0 || entry.mentors.length > 0) {
+    entry.status = 'ok';
+  } else if (entry.status !== 'fetch-failed') {
+    entry.status = 'no-contact-found';
+  }
+}
+
+async function extractForOrg(org, fetchedAt) {
+  const entry = buildBaseEntry(org, fetchedAt);
+  const ideasUrl = typeof org.ideas === 'string' ? org.ideas.trim() : '';
+
+  if (!ideasUrl) {
+    return entry;
+  }
+
+  try {
+    const response = await fetchWithTimeout(ideasUrl, { headers: DEFAULT_HEADERS });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const html = await response.text();
+    const anchors = extractAnchorCandidates(html);
+    const seenUrls = new Set();
+    const mentors = [];
+
+    anchors.forEach((anchor) => {
+      const normalizedUrl = normalizeHttpUrl(anchor.href, ideasUrl);
+      if (!normalizedUrl) return;
+
+      const channelType = detectChannelType(normalizedUrl);
+      if (channelType) {
+        if (!seenUrls.has(normalizedUrl) && isHighConfidenceChannel(channelType, normalizedUrl, anchor)) {
+          seenUrls.add(normalizedUrl);
+          const record = createChannelRecord(org.name, channelType, normalizedUrl, anchor.label);
+          if (channelType === 'Mailing list') {
+            entry.mailingLists.push(record);
+          } else {
+            entry.channels.push(record);
+          }
+        }
+      }
+
+      const githubProfile = isGitHubProfileUrl(normalizedUrl);
+      if (githubProfile && isHighConfidenceGitHubAnchor(anchor, githubProfile)) {
+        mentors.push(githubProfile);
+      }
+
+      mentors.push(...extractMentorMentions(anchor.context));
+    });
+
+    mentors.push(...extractMentorMentions(stripHtml(html)));
+    entry.mentors = dedupeMentors(mentors)
+      .filter((mentor) => mentor.github || isMeaningfulMentorName(mentor.name))
+      .map((mentor) => ({
+        name: mentor.name || '',
+        github: mentor.github || '',
+        githubUrl: mentor.githubUrl || ''
+      }));
+
+    entry.status = 'no-contact-found';
+    applyTip(entry);
+    finalizeStatus(entry);
+    return entry;
+  } catch (error) {
+    console.error(`❌ Failed mentor extraction for ${org.name}: ${error.message}`);
+    return entry;
+  }
+}
+
+async function main() {
+  const fetchedAt = new Date().toISOString();
+  const { limit, orgs } = parseArgs(process.argv.slice(2));
+
+  let targets = [...ORGS];
+  if (Array.isArray(orgs) && orgs.length > 0) {
+    targets = targets.filter((org) => orgs.includes(org.name.toLowerCase()));
+  }
+  if (Number.isFinite(limit) && limit > 0) {
+    targets = targets.slice(0, limit);
+  }
+
+  console.log(`🚀 Extracting mentor contact data for ${targets.length} orgs`);
+
+  const results = {};
+  for (const org of ORGS) {
+    results[org.name] = buildBaseEntry(org, fetchedAt);
+  }
+
+  for (let i = 0; i < targets.length; i += BATCH_SIZE) {
+    const batch = targets.slice(i, i + BATCH_SIZE);
+    const extracted = await Promise.all(batch.map((org) => extractForOrg(org, fetchedAt)));
+
+    extracted.forEach((entry) => {
+      results[entry.org] = entry;
+      console.log(`✅ ${entry.org} → ${entry.status} (${entry.channels.length} channels, ${entry.mailingLists.length} lists, ${entry.mentors.length} mentors)`);
+    });
+
+    if (i + BATCH_SIZE < targets.length) {
+      await sleep(BATCH_DELAY_MS);
+    }
+  }
+
+  fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
+  fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(results, null, 2)}\n`);
+  console.log(`🎉 Saved mentor data to ${OUTPUT_PATH}`);
+}
+
+main().catch((error) => {
+  console.error('Fatal mentor extraction error:', error);
+  process.exit(1);
+});
