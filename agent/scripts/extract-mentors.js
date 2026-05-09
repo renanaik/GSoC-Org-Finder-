@@ -257,7 +257,7 @@ function extractMentorMentions(text) {
         });
       }
 
-      const namePattern = new RegExp(String.raw`${word}\s*[:\-]\s*([A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?)\b`);
+      const namePattern = new RegExp(String.raw`${word}\s*[:-]\s*([A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?)\b`);
       const nameMatch = snippet.match(namePattern);
       if (nameMatch) {
         const candidateName = nameMatch[1].trim();
@@ -303,7 +303,7 @@ function isMeaningfulMentorName(name) {
   const normalized = value.toLowerCase();
   if (STOPWORD_NAMES.has(normalized)) return false;
   // Check all tokens (including hyphenated) for stopwords
-  const allTokens = value.toLowerCase().split(/[\s\-]+/);
+  const allTokens = value.toLowerCase().split(/[\s-]+/);
   for (const token of allTokens) {
     if (STOPWORD_NAMES.has(token)) return false;
   }

@@ -1,4 +1,5 @@
 /* global ORGS */
+/* exported openAnalytics, closeAnEvent, fetchAll, fetchModalGH, toggleCompareFromModal, openCompare, closeCompareEv, imgErr, toggleBookmark, toggleChip, resetFilters, closeModalEv, openIssuesPage, closeIssuesPage, fetchAllIssues, showMoreIssues */
 
 // ══════════════════════════════════════════════
 // THEME
@@ -196,7 +197,9 @@ function closeAn(){document.getElementById('anBg').classList.remove('open');docu
 // ══════════════════════════════════════════════
 const API='/api/github';
 const cache=JSON.parse(localStorage.getItem('gaf_ghc')||'{}');
-let modalIdx=-1,pills=new Set(),chips=new Set(),fetching=false,lastSearch='';
+let modalIdx=-1,fetching=false,lastSearch='';
+const pills=new Set();
+const chips=new Set();
 let matchAllLanguages=false; // false = OR (any), true = AND (all)
 
 // Expose to global scope for HTML onclick handlers and debugging
@@ -408,7 +411,7 @@ function renderCompareTable(){
     let cells='';
     if(row.type==='bar'){
       const mx=Math.max(...row.vals);
-      cells=row.vals.map((v,i)=>{
+      cells=row.vals.map((v)=>{
         const pct=mx>0?Math.round(v/mx*100):0;
         return`<td><div class="cmp-bar-wrap"><div class="cmp-bar-track"><div class="cmp-bar-fill" style="width:${pct}%"></div></div><span class="cmp-val">${v}y</span></div></td>`;
       }).join('');
@@ -503,16 +506,6 @@ function orgMatchesLanguages(org, selectedLanguages) {
     });
   }
 }
-
-function debounce(fn, delay) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
-}
-
-const debouncedFilter = debounce(applyFilters, 280);
 
 function applyFilters(){
   const search=document.getElementById('searchInput').value.trim().toLowerCase();
@@ -880,7 +873,7 @@ function resetFilters(){
   Object.keys(chipCls).forEach(k=>{const e=document.getElementById('chip-'+k);if(e)e.className='chip';});
 
   document.querySelectorAll('.pill.active').forEach(p=>{p.classList.remove('active');p.setAttribute('aria-pressed','false');});
-  Object.keys(chipCls).forEach(k=>{const e=document.getElementById('chip-'+k);if(e)e.className='chip'});
+  Object.keys(chipCls).forEach(k=>{const e=document.getElementById('chip-'+k);if(e)e.className='chip';});
   renderSelectedLanguages();
  
   applyFilters();
