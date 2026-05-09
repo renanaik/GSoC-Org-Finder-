@@ -112,10 +112,34 @@ function stripHtml(value) {
     }
   }
 
-  return decodeHtmlEntities(text
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' '))
-    .trim();
+  // Linear-time HTML tag stripper to avoid super-linear regex backtracking
+  function removeTagsLinear(s) {
+    const parts = [];
+    let last = 0;
+    const len = s.length;
+    while (last < len) {
+      const open = s.indexOf('<', last);
+      if (open === -1) {
+        parts.push(s.slice(last));
+        break;
+      }
+      // push text before tag
+      parts.push(s.slice(last, open));
+      const close = s.indexOf('>', open + 1);
+      if (close === -1) {
+        // no closing tag found; append rest after '<' and stop
+        parts.push(s.slice(open + 1));
+        break;
+      }
+      // replace tag content with a single space to preserve spacing
+      parts.push(' ');
+      last = close + 1;
+    }
+    return parts.join('');
+  }
+
+  const withoutTags = removeTagsLinear(text);
+  return decodeHtmlEntities(withoutTags.replace(/\s+/g, ' ')).trim();
 }
 
 function fetchWithTimeout(url, options = {}) {
