@@ -64,6 +64,9 @@ jobs:
       - name: Extract mentor contacts
         run: node agent/scripts/extract-mentors.js
 
+      - name: Validate mentor data
+        run: node agent/scripts/validate-mentors.js
+
       # ─────────────────────────────────────────────
       # Optional UI cache generation
       # ─────────────────────────────────────────────

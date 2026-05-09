@@ -14,12 +14,12 @@ const CONTACT_TIPS = {
 };
 
 const CHANNEL_MATCHERS = [
-  { type: 'Slack', match: (hostname) => hostname === 'slack.com' || hostname.endsWith('.slack.com') },
-  { type: 'Zulip', match: (hostname) => hostname === 'zulip.com' || hostname.endsWith('.zulip.com') },
-  { type: 'Matrix', match: (hostname) => hostname === 'matrix.to' || hostname.endsWith('.matrix.to') },
-  { type: 'IRC', match: (hostname) => hostname === 'irc.libera.chat' || hostname.endsWith('.irc.libera.chat') },
-  { type: 'Discord', match: (hostname) => hostname === 'discord.gg' || hostname.endsWith('.discord.gg') },
-  { type: 'Mailing list', match: (hostname) => hostname === 'groups.google.com' || hostname.includes('lists.') },
+  { type: 'Slack', match: (hostname) => hostname === 'slack.com' || hostname.endsWith('.slack.com') || hostname === 'slack.gg' || hostname.endsWith('.slack.gg') },
+  { type: 'Zulip', match: (hostname) => hostname === 'zulip.com' || hostname.endsWith('.zulip.com') || hostname.endsWith('.zulipchat.com') || hostname === 'chat.zulip.org' },
+  { type: 'Matrix', match: (hostname) => hostname === 'matrix.to' || hostname.endsWith('.matrix.to') || hostname === 'app.element.io' || hostname.endsWith('.element.io') },
+  { type: 'IRC', match: (hostname) => hostname === 'irc.libera.chat' || hostname.endsWith('.irc.libera.chat') || hostname === 'irc.freenode.net' || hostname.endsWith('.irc.freenode.net') || /(^|\.)irc\.o.*\.net$/i.test(hostname) },
+  { type: 'Discord', match: (hostname) => hostname === 'discord.gg' || hostname.endsWith('.discord.gg') || hostname === 'discord.com' || hostname.endsWith('.discord.com') },
+  { type: 'Mailing list', match: (hostname) => hostname === 'groups.google.com' || hostname.includes('lists.') || hostname.includes('mailman') || hostname.includes('pipermail') },
 ];
 
 const REQUEST_TIMEOUT_MS = 15000;
@@ -30,8 +30,8 @@ const DEFAULT_HEADERS = {
   Accept: 'text/html,application/xhtml+xml',
   'User-Agent': 'gsoc-org-finder-mentor-refresh'
 };
-const CONFIDENCE_REGEX = /\b(mentor|mentors|contact|contacts|maintainer|maintainers)\b/i;
 const CHANNEL_CONFIDENCE_REGEX = /\b(join|chat|channel|community|stream|forum|discussion|mailing|list|gsoc|mentor)\b/i;
+const MENTOR_WORDS = ['mentor', 'mentors', 'contact', 'contacts', 'maintainer', 'maintainers', 'reach out', 'gsoc'];
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -152,6 +152,12 @@ function detectChannelType(urlString) {
   }
 }
 
+function isLikelyMentor(text, handle = '') {
+  const lowerText = String(text || '').toLowerCase();
+  const lowerHandle = String(handle || '').toLowerCase();
+  return MENTOR_WORDS.some((word) => lowerText.includes(word) || (lowerHandle && lowerHandle.includes(word)));
+}
+
 function isMeaningfulLabel(label) {
   if (!label) return false;
   const normalized = label.trim().toLowerCase();
@@ -195,7 +201,7 @@ function isHighConfidenceChannel(type, normalizedUrl, anchor) {
   }
 
   if (type === 'Matrix') {
-    return normalizedUrl.includes('/#/') || normalizedUrl.includes('#/') || CHANNEL_CONFIDENCE_REGEX.test(lowerContext);
+    return normalizedUrl.includes('/#/') || normalizedUrl.includes('#/') || normalizedUrl.includes('/room/') || CHANNEL_CONFIDENCE_REGEX.test(lowerContext);
   }
 
   if (type === 'Zulip') {
@@ -229,7 +235,7 @@ function isGitHubProfileUrl(urlString) {
 function extractMentorMentions(text) {
   const results = [];
   const lowered = text.toLowerCase();
-  const confidenceWords = ['mentor', 'mentors', 'contact', 'contacts', 'maintainer', 'maintainers'];
+  const confidenceWords = MENTOR_WORDS;
 
   confidenceWords.forEach((word) => {
     let fromIndex = 0;
@@ -279,17 +285,8 @@ function dedupeMentors(mentors) {
 }
 
 function isHighConfidenceGitHubAnchor(anchor, githubProfile) {
-  const label = (anchor.label || '').trim().toLowerCase();
   const context = (anchor.context || '').trim();
-  if (CONFIDENCE_REGEX.test(context)) {
-    return true;
-  }
-
-  if (label === `@${githubProfile.github.toLowerCase()}`) {
-    return true;
-  }
-
-  return false;
+  return isLikelyMentor(context, githubProfile.github);
 }
 
 function isMeaningfulMentorName(name) {
@@ -323,6 +320,66 @@ function finalizeStatus(entry) {
   }
 }
 
+function extractMentors(html, orgInput, options = {}) {
+  const fetchedAt = options.fetchedAt || new Date().toISOString();
+  const org = typeof orgInput === 'string'
+    ? { name: orgInput, ideas: options.ideasUrl || '' }
+    : orgInput;
+
+  const entry = buildBaseEntry(org, fetchedAt);
+  const ideasUrl = typeof options.ideasUrl === 'string'
+    ? options.ideasUrl
+    : entry.ideasUrl;
+  const baseUrl = ideasUrl || 'https://example.test/';
+  const anchors = extractAnchorCandidates(html);
+  const seenUrls = new Set();
+  const mentors = [];
+
+  anchors.forEach((anchor) => {
+    const normalizedUrl = normalizeHttpUrl(anchor.href, baseUrl);
+    if (!normalizedUrl) return;
+
+    const channelType = detectChannelType(normalizedUrl);
+    if (channelType) {
+      if (!seenUrls.has(normalizedUrl) && isHighConfidenceChannel(channelType, normalizedUrl, anchor)) {
+        seenUrls.add(normalizedUrl);
+        const record = createChannelRecord(org.name, channelType, normalizedUrl, anchor.label);
+        if (channelType === 'Mailing list') {
+          entry.mailingLists.push(record);
+        } else {
+          entry.channels.push(record);
+        }
+      }
+    }
+
+    const githubProfile = isGitHubProfileUrl(normalizedUrl);
+    if (githubProfile && isHighConfidenceGitHubAnchor(anchor, githubProfile)) {
+      mentors.push(githubProfile);
+    }
+
+      if (isLikelyMentor(anchor.context)) {
+        mentors.push(...extractMentorMentions(anchor.context));
+      }
+  });
+
+  const pageText = stripHtml(html);
+  if (isLikelyMentor(pageText)) {
+    mentors.push(...extractMentorMentions(pageText));
+  }
+  entry.mentors = dedupeMentors(mentors)
+    .filter((mentor) => mentor.github || isMeaningfulMentorName(mentor.name))
+    .map((mentor) => ({
+      name: mentor.name || '',
+      github: mentor.github || '',
+      githubUrl: mentor.githubUrl || ''
+    }));
+
+  entry.status = 'no-contact-found';
+  applyTip(entry);
+  finalizeStatus(entry);
+  return entry;
+}
+
 async function extractForOrg(org, fetchedAt) {
   const entry = buildBaseEntry(org, fetchedAt);
   const ideasUrl = typeof org.ideas === 'string' ? org.ideas.trim() : '';
@@ -338,48 +395,7 @@ async function extractForOrg(org, fetchedAt) {
     }
 
     const html = await response.text();
-    const anchors = extractAnchorCandidates(html);
-    const seenUrls = new Set();
-    const mentors = [];
-
-    anchors.forEach((anchor) => {
-      const normalizedUrl = normalizeHttpUrl(anchor.href, ideasUrl);
-      if (!normalizedUrl) return;
-
-      const channelType = detectChannelType(normalizedUrl);
-      if (channelType) {
-        if (!seenUrls.has(normalizedUrl) && isHighConfidenceChannel(channelType, normalizedUrl, anchor)) {
-          seenUrls.add(normalizedUrl);
-          const record = createChannelRecord(org.name, channelType, normalizedUrl, anchor.label);
-          if (channelType === 'Mailing list') {
-            entry.mailingLists.push(record);
-          } else {
-            entry.channels.push(record);
-          }
-        }
-      }
-
-      const githubProfile = isGitHubProfileUrl(normalizedUrl);
-      if (githubProfile && isHighConfidenceGitHubAnchor(anchor, githubProfile)) {
-        mentors.push(githubProfile);
-      }
-
-      mentors.push(...extractMentorMentions(anchor.context));
-    });
-
-    mentors.push(...extractMentorMentions(stripHtml(html)));
-    entry.mentors = dedupeMentors(mentors)
-      .filter((mentor) => mentor.github || isMeaningfulMentorName(mentor.name))
-      .map((mentor) => ({
-        name: mentor.name || '',
-        github: mentor.github || '',
-        githubUrl: mentor.githubUrl || ''
-      }));
-
-    entry.status = 'no-contact-found';
-    applyTip(entry);
-    finalizeStatus(entry);
-    return entry;
+    return extractMentors(html, org, { fetchedAt, ideasUrl });
   } catch (error) {
     console.error(`❌ Failed mentor extraction for ${org.name}: ${error.message}`);
     return entry;
@@ -424,7 +440,13 @@ async function main() {
   console.log(`🎉 Saved mentor data to ${OUTPUT_PATH}`);
 }
 
-main().catch((error) => {
-  console.error('Fatal mentor extraction error:', error);
-  process.exit(1);
-});
+module.exports = {
+  extractMentors
+};
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error('Fatal mentor extraction error:', error);
+    process.exit(1);
+  });
+}
