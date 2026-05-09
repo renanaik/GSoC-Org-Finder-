@@ -1749,6 +1749,27 @@ if(org.ideas){
     document.body.style.overflow = 'auto';
   }
 
+  function openRandomOrg() {
+    console.log('openRandomOrg called');
+    console.log('filteredOrgs length:', filteredOrgs.length);
+    console.log('ORGS length:', ORGS.length);
+    
+    // Use filteredOrgs if available, otherwise fall back to all ORGS
+    const orgsToUse = filteredOrgs.length > 0 ? filteredOrgs : ORGS;
+    
+    if (!orgsToUse.length) {
+      console.log('No organizations available');
+      alert('No organizations available!');
+      return;
+    }
+
+    const randomIdx = Math.floor(Math.random() * orgsToUse.length);
+    const randomOrg = orgsToUse[randomIdx];
+    console.log('Selected org:', randomOrg.name);
+    
+    openModal(randomOrg.name);
+  }
+
   // Filters — all conditions are additive (chip + language pills + search + dropdowns compose)
   function applyFilters() {
     const query = document.getElementById('searchInput').value.toLowerCase();
@@ -1810,6 +1831,9 @@ if(org.ideas){
     visibleCount += 12;
     renderOrgs(false);
   });
+
+  // Surprise button event listener
+  document.getElementById('surpriseBtn')?.addEventListener('click', openRandomOrg);
 
   // Hero Search Link
   document.getElementById('hero-search').addEventListener('input', (e) => {
