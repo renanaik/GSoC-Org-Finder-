@@ -65,6 +65,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ─────────────────────────────────────────────
+      # Ensure optional generated files exist
+      # ─────────────────────────────────────────────
+      - name: Ensure generated files exist
+        run: |
+          mkdir -p data
+
+          if [ ! -f data/ui-summary.json ]; then
+            echo '{}' > data/ui-summary.json
+          fi
+
+          if [ ! -f data/org-stats.json ]; then
+            echo '{}' > data/org-stats.json
+          fi
+
+      # ─────────────────────────────────────────────
       # Update refresh timestamp
       # ─────────────────────────────────────────────
       - name: Update refresh timestamp
