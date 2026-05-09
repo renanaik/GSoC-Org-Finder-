@@ -968,29 +968,6 @@ function openModal(idx){
 function closeModalEv(e){if(e.target===document.getElementById('modalBg'))closeModal();}
 function closeModal(){document.getElementById('modalBg').classList.remove('open');document.body.style.overflow='';modalIdx=-1;}
 
-function openRandomOrg() {
-  console.log('openRandomOrg called');
-  console.log('filteredOrgs length:', filteredOrgs.length);
-  console.log('ORGS length:', ORGS.length);
-  
-  // Use filteredOrgs if available, otherwise fall back to all ORGS
-  const orgsToUse = filteredOrgs.length > 0 ? filteredOrgs : ORGS;
-  
-  if (!orgsToUse.length) {
-    console.log('No organizations available');
-    showCompareToast('No organizations available!');
-    return;
-  }
-
-  const randomIdx = Math.floor(Math.random() * orgsToUse.length);
-  const randomOrg = orgsToUse[randomIdx];
-  console.log('Selected org:', randomOrg.name);
-  const globalIdx = ORGS.indexOf(randomOrg);
-  console.log('Global index:', globalIdx);
-  
-  openModal(globalIdx);
-}
-
 // ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
@@ -1229,9 +1206,6 @@ document.getElementById('matchAllLanguagesToggle')?.addEventListener('change', (
   matchAllLanguages = e.target.checked;
   applyFilters();
 });
-
-// Surprise button event listener
-document.getElementById('surpriseBtn').addEventListener('click', openRandomOrg);
 
 requestAnimationFrame(()=>{
   const params = new URLSearchParams(location.search);
