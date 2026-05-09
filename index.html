@@ -1742,26 +1742,6 @@ if(org.ideas){
     
     document.getElementById('orgModal').classList.add('open');
     document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    document.getElementById('orgModal').classList.remove('open');
-    document.body.style.overflow = 'auto';
-  }
-
-  function openRandomOrg() {
-    const orgsToUse = filteredOrgs.length > 0 ? filteredOrgs : ORGS;
-    
-    if (!orgsToUse.length) {
-      alert('No organizations match your filters — try clearing some!');
-      return;
-    }
-
-    const randomIdx = Math.floor(Math.random() * orgsToUse.length);
-    const randomOrg = orgsToUse[randomIdx];
-    
-    openModal(randomOrg.name);
-  }
 
   // Filters — all conditions are additive (chip + language pills + search + dropdowns compose)
   function applyFilters() {
