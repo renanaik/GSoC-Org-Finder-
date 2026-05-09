@@ -969,15 +969,26 @@ function closeModalEv(e){if(e.target===document.getElementById('modalBg'))closeM
 function closeModal(){document.getElementById('modalBg').classList.remove('open');document.body.style.overflow='';modalIdx=-1;}
 
 function openRandomOrg() {
-  if (!filteredOrgs.length) {
-    showCompareToast('No orgs match your filters — try clearing some!');
+  console.log('openRandomOrg called');
+  console.log('filteredOrgs length:', filteredOrgs.length);
+  console.log('ORGS length:', ORGS.length);
+  
+  // Use filteredOrgs if available, otherwise fall back to all ORGS
+  const orgsToUse = filteredOrgs.length > 0 ? filteredOrgs : ORGS;
+  
+  if (!orgsToUse.length) {
+    console.log('No organizations available');
+    showCompareToast('No organizations available!');
     return;
   }
 
-  const randomIdx = Math.floor(Math.random() * filteredOrgs.length);
-  const randomOrg = filteredOrgs[randomIdx];
-
-  openModal(ORGS.indexOf(randomOrg));
+  const randomIdx = Math.floor(Math.random() * orgsToUse.length);
+  const randomOrg = orgsToUse[randomIdx];
+  console.log('Selected org:', randomOrg.name);
+  const globalIdx = ORGS.indexOf(randomOrg);
+  console.log('Global index:', globalIdx);
+  
+  openModal(globalIdx);
 }
 
 // ══════════════════════════════════════════════
