@@ -12,7 +12,7 @@ Join our Channel for community-related questions and feedback
 
 ## ✨ What is this?
 
-A fast, beautiful, single-page tool that helps GSoC 2026 applicants cut through all **185 selected organizations** and instantly find the ones that match *their* skills and interests.
+A fast, beautiful, single-page tool that helps GSoC 2026 applicants cut through all **184 selected organizations** and instantly find the ones that match *their* skills and interests.
 
 No sign-up. No install. No build step. Just open and explore.
 
@@ -45,7 +45,7 @@ No sign-up. No install. No build step. Just open and explore.
 
 | Feature | Details |
 |---------|---------|
-| 🔍 Search | Full-text across 185 orgs |
+| 🔍 Search | Full-text across 184 orgs |
 | 🏷️ Filters | 15+ domains, 30+ languages |
 | ⚖️ Compare | Up to 3 organizations side-by-side |
 | 🟢 Good Issues | Browse beginner-friendly issues |
@@ -81,7 +81,7 @@ No sign-up. No install. No build step. Just open and explore.
 - 🟢 Green/🔴 red highlighting for best and worst values across each metric
 
 ### 🟢 Good First Issues Page
-- 📄 Dedicated full-screen page listing **Good First Issues from all 185 orgs** 
+- 📄 Dedicated full-screen page listing **Good First Issues from all 184 orgs** 
 - ⚡ Fetched live via the GitHub API proxy (uses your token , respects rate limits )
 - 🔎 Filter by category , language , or free-text search 
 - 🔗 Each issue links directly to GitHub — sorted newest first 
@@ -308,6 +308,7 @@ All responses are cached in-memory for **1 hour** on the Edge runtime.
 <a href="https://github.com/Ashusf90"><img src="https://github.com/Ashusf90.png" width="50px" alt="Ashusf90" /></a>
 <a href="https://github.com/Chizaram-Igolo"><img src="https://github.com/Chizaram-Igolo.png" width="50px" alt="Chizaram-Igolo" /></a>
 <a href="https://github.com/Dj-Shortcut"><img src="https://github.com/Dj-Shortcut.png" width="50px" alt="Dj-Shortcut" /></a>
+<a href="https://github.com/HarshaVardhan31012007"><img src="https://github.com/HarshaVardhan31012007.png" width="50px" alt="HarshaVardhan31012007" /></a>
 <a href="https://github.com/Harshith1702"><img src="https://github.com/Harshith1702.png" width="50px" alt="Harshith1702" /></a>
 <a href="https://github.com/Itheshjs"><img src="https://github.com/Itheshjs.png" width="50px" alt="Itheshjs" /></a>
 <a href="https://github.com/Kuldeeps1505"><img src="https://github.com/Kuldeeps1505.png" width="50px" alt="Kuldeeps1505" /></a>
