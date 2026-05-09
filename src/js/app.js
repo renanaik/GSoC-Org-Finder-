@@ -968,6 +968,18 @@ function openModal(idx){
 function closeModalEv(e){if(e.target===document.getElementById('modalBg'))closeModal();}
 function closeModal(){document.getElementById('modalBg').classList.remove('open');document.body.style.overflow='';modalIdx=-1;}
 
+function openRandomOrg() {
+  if (!filteredOrgs.length) {
+    showCompareToast('No orgs match your filters — try clearing some!');
+    return;
+  }
+
+  const randomIdx = Math.floor(Math.random() * filteredOrgs.length);
+  const randomOrg = filteredOrgs[randomIdx];
+
+  openModal(ORGS.indexOf(randomOrg));
+}
+
 // ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
@@ -1206,6 +1218,9 @@ document.getElementById('matchAllLanguagesToggle')?.addEventListener('change', (
   matchAllLanguages = e.target.checked;
   applyFilters();
 });
+
+// Surprise button event listener
+document.getElementById('surpriseBtn').addEventListener('click', openRandomOrg);
 
 requestAnimationFrame(()=>{
   const params = new URLSearchParams(location.search);
