@@ -1750,22 +1750,15 @@ if(org.ideas){
   }
 
   function openRandomOrg() {
-    console.log('openRandomOrg called');
-    console.log('filteredOrgs length:', filteredOrgs.length);
-    console.log('ORGS length:', ORGS.length);
-    
-    // Use filteredOrgs if available, otherwise fall back to all ORGS
     const orgsToUse = filteredOrgs.length > 0 ? filteredOrgs : ORGS;
     
     if (!orgsToUse.length) {
-      console.log('No organizations available');
-      alert('No organizations available!');
+      alert('No organizations match your filters — try clearing some!');
       return;
     }
 
     const randomIdx = Math.floor(Math.random() * orgsToUse.length);
     const randomOrg = orgsToUse[randomIdx];
-    console.log('Selected org:', randomOrg.name);
     
     openModal(randomOrg.name);
   }
