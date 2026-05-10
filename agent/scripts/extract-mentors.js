@@ -78,12 +78,12 @@ function buildBaseEntry(org, fetchedAt) {
 
 function decodeHtmlEntities(value) {
   return String(value || '')
-    .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
-    .replace(/&nbsp;/gi, ' ');
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&');
 }
 
 function stripHtml(value) {
