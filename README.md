@@ -288,8 +288,10 @@ The Edge Function proxies GitHub API calls so your token never hits the client.
 | `GET /api/github?repo=owner/repo&gfi=1&issues=1` | Full list of up to 30 open Good First Issues |
 
 All responses are cached in-memory for **1 hour** on the Edge runtime.
-## We are officially a Project for Nexus Spring of Code 2026
-<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/328b59f6-5a19-42bf-ad40-4ade9d86b4d4" />
+## We are officially a Project for Nexus Spring of Code 2026 and GirlScript Summer of Code 2026
+<img width="400" height="300" alt="Gemini_Generated_Image_1eyond1eyond1eyo" src="https://github.com/user-attachments/assets/0cfe15fe-2d4a-4389-9a0b-8cf8d0cfd8cd" />
+
+
 
 ## We thank all our Contributors for improving this project
 
