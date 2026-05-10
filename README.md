@@ -12,7 +12,7 @@ Join our Channel for community-related questions and feedback
 
 ## ✨ What is this?
 
-A fast, beautiful, single-page tool that helps GSoC 2026 applicants cut through all **185 selected organizations** and instantly find the ones that match *their* skills and interests.
+A fast, beautiful, single-page tool that helps GSoC 2026 applicants cut through all **184 selected organizations** and instantly find the ones that match *their* skills and interests.
 
 No sign-up. No install. No build step. Just open and explore.
 
@@ -45,7 +45,7 @@ No sign-up. No install. No build step. Just open and explore.
 
 | Feature | Details |
 |---------|---------|
-| 🔍 Search | Full-text across 185 orgs |
+| 🔍 Search | Full-text across 184 orgs |
 | 🏷️ Filters | 15+ domains, 30+ languages |
 | ⚖️ Compare | Up to 3 organizations side-by-side |
 | 🟢 Good Issues | Browse beginner-friendly issues |
@@ -81,7 +81,7 @@ No sign-up. No install. No build step. Just open and explore.
 - 🟢 Green/🔴 red highlighting for best and worst values across each metric
 
 ### 🟢 Good First Issues Page
-- 📄 Dedicated full-screen page listing **Good First Issues from all 185 orgs** 
+- 📄 Dedicated full-screen page listing **Good First Issues from all 184 orgs** 
 - ⚡ Fetched live via the GitHub API proxy (uses your token , respects rate limits )
 - 🔎 Filter by category , language , or free-text search 
 - 🔗 Each issue links directly to GitHub — sorted newest first 
@@ -288,8 +288,10 @@ The Edge Function proxies GitHub API calls so your token never hits the client.
 | `GET /api/github?repo=owner/repo&gfi=1&issues=1` | Full list of up to 30 open Good First Issues |
 
 All responses are cached in-memory for **1 hour** on the Edge runtime.
-## We are officially a Project for Nexus Spring of Code 2026
-<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/328b59f6-5a19-42bf-ad40-4ade9d86b4d4" />
+## We are officially a Project for Nexus Spring of Code 2026 and GirlScript Summer of Code 2026
+<img width="400" height="300" alt="Gemini_Generated_Image_1eyond1eyond1eyo" src="https://github.com/user-attachments/assets/0cfe15fe-2d4a-4389-9a0b-8cf8d0cfd8cd" />
+
+
 
 ## We thank all our Contributors for improving this project
 
