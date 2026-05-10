@@ -33,12 +33,30 @@ jobs:
         run: npm ci
 
       # ─────────────────────────────────────────────
-      # Fetch latest good first issues
+      # Ensure required directories/files exist
+      # Prevent create-pull-request failures
+      # ─────────────────────────────────────────────
+      - name: Prepare data directory
+        run: |
+          mkdir -p data
+
+          [ -f data/issues.json ] || echo "{}" > data/issues.json
+          [ -f data/mentors.json ] || echo "{}" > data/mentors.json
+          [ -f data/last-updated.json ] || echo "{}" > data/last-updated.json
+
+      # ─────────────────────────────────────────────
+      # Refresh issue dataset
       # ─────────────────────────────────────────────
       - name: Fetch good first issues
         run: node agent/scripts/fetch-issues.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract mentor contacts
+        run: node agent/scripts/extract-mentors.js
+
+      - name: Validate mentor data
+        run: node agent/scripts/validate-mentors.js
 
       # ─────────────────────────────────────────────
       # Generate UI summary cache
@@ -149,6 +167,7 @@ jobs:
             This PR updates:
 
             - good first issue dataset
+            - mentor contact dataset
             - UI summary cache
             - organization metadata
             - refresh timestamps
@@ -163,6 +182,8 @@ jobs:
 
           add-paths: |
             data/issues.json
+            data/mentors.json
+            
             data/ui-summary.json
             data/last-updated.json
             data/org-stats.json
