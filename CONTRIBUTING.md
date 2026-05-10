@@ -204,9 +204,9 @@ Includes:
 
 ---
 
-## ⚠️ NSoC'26 Contribution Quality Standards
+## ⚠️ NSoC'26 & GSSoC'26 Contribution Quality Standards
 
-This project participates in **NSoC'26**. All contributors are required to maintain fairness, integrity, and quality in every submission.
+This project participates in **NSoC'26** and **GSSoC'26**. All contributors are required to maintain fairness, integrity, and quality in every submission.
 
 These standards are actively enforced.
 
@@ -332,7 +332,7 @@ If unsure about anything:
 
 * Open an issue
 * Use GitHub Discussions
-
+* Or use our discord channel 
 ---
 
 Thank you for contributing to FindMyGSoC! 🎉
