@@ -7,6 +7,29 @@ const merged = process.env.PR_MERGED === 'true';
 const owner = process.env.REPO_OWNER;
 const repo = process.env.REPO_NAME;
 
+const EXCLUDED_USERS = ['S3DFX-CYBER', 'github-actions[bot]'];
+
+/**
+ * Checks if a user should be excluded from the leaderboard.
+ * @param {string} login User's login name
+ * @param {string} type User's type (e.g., 'Bot')
+ * @param {string} association User's association (e.g., 'OWNER')
+ */
+function isExcluded(login, type, association) {
+  if (!login) return true;
+  return (
+    EXCLUDED_USERS.includes(login) ||
+    login.endsWith('[bot]') ||
+    type === 'Bot' ||
+    association === 'OWNER'
+  );
+}
+
+// Early exit if the PR author is a bot or maintainer
+if (isExcluded(username)) {
+  process.exit(0);
+}
+
 async function github(path) {
   const res = await fetch(`https://api.github.com${path}`, {
     headers: {
@@ -48,7 +71,7 @@ async function getAllClosedPRs() {
   const contributorMap = new Map();
 
   for (const pr of prs) {
-    if (!pr.user) continue;
+    if (!pr.user || isExcluded(pr.user.login, pr.user.type, pr.author_association)) continue;
 
     const login = pr.user.login;
 
@@ -77,7 +100,7 @@ async function getAllClosedPRs() {
   );
 
   for (const pr of openPRs) {
-    if (!pr.user) continue;
+    if (!pr.user || isExcluded(pr.user.login, pr.user.type, pr.author_association)) continue;
 
     const login = pr.user.login;
 
