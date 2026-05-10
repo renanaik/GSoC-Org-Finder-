@@ -51,6 +51,11 @@ jobs:
 
             const body = fs.readFileSync('comment.md', 'utf8');
 
+            if (!body.trim()) {
+              core.info('Leaderboard comment is empty, skipping.');
+              return;
+            }
+
             const comments = await github.paginate(
               github.rest.issues.listComments,
               {
