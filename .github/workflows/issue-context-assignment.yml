@@ -29,6 +29,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
           script: |
+            const fs = require('fs');
+
             const issue = context.payload.issue;
             const comment = context.payload.comment;
             const sender = context.payload.sender;
@@ -43,15 +45,15 @@ jobs:
             // Ignore bots
             // ─────────────────────────────────────────────
             if (sender.type === 'Bot') {
-              core.info('Ignoring bot.');
+              core.info('Ignoring bot user.');
               return;
             }
 
+            // ─────────────────────────────────────────────
+            // Validate assignment command
+            // ─────────────────────────────────────────────
             const commentBody = (comment.body || '').toLowerCase();
 
-            // ─────────────────────────────────────────────
-            // Assignment commands
-            // ─────────────────────────────────────────────
             const wantsAssign =
               commentBody.includes('/assign') ||
               commentBody.includes('assign me');
@@ -66,21 +68,46 @@ jobs:
             }
 
             // ─────────────────────────────────────────────
-            // Handle unassign
+            // Detect contribution program
+            // ─────────────────────────────────────────────
+            const mentionsGSSOC =
+              commentBody.includes('gssoc');
+
+            const mentionsNSOC =
+              commentBody.includes('nsoc');
+
+            // ─────────────────────────────────────────────
+            // Reject old assignment format
+            // ─────────────────────────────────────────────
+            if (wantsAssign && !mentionsGSSOC && !mentionsNSOC) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body:
+                  `❌ Assignment request rejected.\n\n` +
+                  `Please mention which program you are contributing under.\n\n` +
+                  `Examples:\n` +
+                  `- \`assign me under gssoc\`\n` +
+                  `- \`/assign nsoc\`\n\n` +
+                  `This is required for contributor tracking and automatic label management.`
+              });
+
+              return;
+            }
+
+            // ─────────────────────────────────────────────
+            // Handle unassignment
             // ─────────────────────────────────────────────
             if (wantsUnassign) {
-
-              const assignedUsers =
-                (issue.assignees || []).map(a => a.login);
+              const assignedUsers = (issue.assignees || []).map(a => a.login);
 
               if (!assignedUsers.includes(username)) {
-
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number,
-                  body:
-                    `⚠️ @${username} is not assigned to this issue.`
+                  body: `⚠️ @${username} is not assigned to this issue.`
                 });
 
                 return;
@@ -97,53 +124,34 @@ jobs:
                 owner,
                 repo,
                 issue_number,
-                body:
-                  `✅ Unassigned @${username} from this issue.`
+                body: `✅ Unassigned @${username} from this issue.`
               });
 
               return;
             }
 
             // ─────────────────────────────────────────────
-            // Require contributor program
+            // Load CONTRIBUTING.md
             // ─────────────────────────────────────────────
-            const hasNsoc = commentBody.includes('nsoc');
-            const hasGssoc = commentBody.includes('gssoc');
+            const contributingPaths = [
+              'CONTRIBUTING.md',
+              'Contributing.md',
+              '.github/CONTRIBUTING.md'
+            ];
 
-            if (!hasNsoc && !hasGssoc) {
+            let contributingContent = '';
 
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number,
-                body:
-                  `❌ Please specify your contribution program.\n\n` +
-                  `Valid examples:\n` +
-                  `- \`/assign nsoc\`\n` +
-                  `- \`/assign gssoc\``
-              });
-
-              return;
+            for (const p of contributingPaths) {
+              if (fs.existsSync(p)) {
+                contributingContent = fs.readFileSync(p, 'utf8');
+                break;
+              }
             }
 
-            // Prevent dual tagging
-            if (hasNsoc && hasGssoc) {
-
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number,
-                body:
-                  `❌ Please specify only one contribution program:\n\n` +
-                  `- nsoc\n` +
-                  `- gssoc`
-              });
-
+            if (!contributingContent) {
+              core.setFailed('Could not find CONTRIBUTING.md');
               return;
             }
-
-            let contributorLabel =
-              hasNsoc ? 'nsoc26' : 'gssoc26';
 
             // ─────────────────────────────────────────────
             // Validate issue quality
@@ -152,28 +160,24 @@ jobs:
             const body = issue.body || '';
 
             if (title.trim().length < 8) {
-
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
                 body:
-                  `❌ Issue title is too short.\n\n` +
-                  `Please provide a meaningful title.`
+                  '❌ Issue title is too short.\n\nPlease provide a meaningful issue title before requesting assignment.'
               });
 
               return;
             }
 
             if (body.trim().length < 30) {
-
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
                 body:
-                  `❌ Issue description is too short.\n\n` +
-                  `Please explain the issue properly before assignment.`
+                  '❌ Issue description is too short.\n\nPlease explain the issue clearly before requesting assignment.'
               });
 
               return;
@@ -182,25 +186,23 @@ jobs:
             // ─────────────────────────────────────────────
             // Prevent multiple assignees
             // ─────────────────────────────────────────────
-            const existingAssignees =
-              (issue.assignees || []).map(a => a.login);
+            const existingAssignees = (issue.assignees || []).map(a => a.login);
 
             if (existingAssignees.length > 0) {
-
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
                 body:
-                  `⚠️ This issue is already assigned to:\n` +
-                  `${existingAssignees.join(', ')}`
+                  `⚠️ This issue is already assigned to: ${existingAssignees.join(', ')}`
               });
 
               return;
             }
 
             // ─────────────────────────────────────────────
-            // Limit contributor to max 3 assignments
+            // Prevent contributors from taking
+            // more than 3 assigned issues
             // ─────────────────────────────────────────────
             const assignedIssues = await github.paginate(
               github.rest.issues.listForRepo,
@@ -213,38 +215,64 @@ jobs:
               }
             );
 
-            const activeAssignments =
-              assignedIssues.filter(i => !i.pull_request);
+            const activeAssignedIssues = assignedIssues.filter(
+              i => !i.pull_request
+            );
 
-            if (activeAssignments.length >= 3) {
-
+            if (activeAssignedIssues.length >= 3) {
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
                 body:
-                  `❌ @${username} already has ` +
-                  `${activeAssignments.length} active assigned issues.\n\n` +
-                  `Maximum allowed active assignments: 3.\n\n` +
-                  `Please complete existing work before requesting more issues.`
+                  `❌ @${username} already has ${activeAssignedIssues.length} assigned issue(s).\n\n` +
+                  `Maximum allowed active assignments: \`3\`\n\n` +
+                  `Please complete or unassign an existing issue before taking another one.`
               });
 
               return;
             }
 
             // ─────────────────────────────────────────────
-            // Use maintainer-defined difficulty labels only
+            // Determine contribution level
             // ─────────────────────────────────────────────
-            const currentLabels =
-              (issue.labels || []).map(l => l.name);
+            const text = `${title}\n${body}`.toLowerCase();
 
-            const level =
-              currentLabels.find(l =>
-                ['level-1', 'level-2', 'level-3'].includes(l)
-              ) || 'level-1';
+            let level = 'level-1';
+
+            const advancedKeywords = [
+              'architecture',
+              'optimization',
+              'security',
+              'performance',
+              'edge function',
+              'refactor',
+              'api',
+              'caching',
+              'core feature'
+            ];
+
+            const intermediateKeywords = [
+              'feature',
+              'logic',
+              'analytics',
+              'sorting',
+              'filter',
+              'enhancement',
+              'improvement'
+            ];
+
+            const hasAdvanced = advancedKeywords.some(k => text.includes(k));
+            const hasIntermediate = intermediateKeywords.some(k => text.includes(k));
+
+            if (hasAdvanced) {
+              level = 'level-3';
+            } else if (hasIntermediate) {
+              level = 'level-2';
+            }
 
             // ─────────────────────────────────────────────
-            // Fetch merged PR history
+            // Fetch contributor merged PR history
             // ─────────────────────────────────────────────
             const prs = await github.paginate(
               github.rest.pulls.list,
@@ -265,16 +293,15 @@ jobs:
             const mergedCount = mergedByUser.length;
 
             // ─────────────────────────────────────────────
-            // Restrict level-3 issues
+            // Enforce Level-3 restriction
             // ─────────────────────────────────────────────
             if (level === 'level-3' && mergedCount < 1) {
-
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
                 body:
-                  `❌ Level 3 issues require at least 1 merged PR.\n\n` +
+                  `❌ Level 3 issues require at least 1 merged PR in this repository.\n\n` +
                   `You currently have ${mergedCount} merged PR(s).`
               });
 
@@ -282,24 +309,60 @@ jobs:
             }
 
             // ─────────────────────────────────────────────
-            // Apply contributor labels
+            // Correct issue labels
             // ─────────────────────────────────────────────
-            const labelsToApply = [
-              contributorLabel,
-              'assigned'
-            ];
+            const currentLabels = (issue.labels || []).map(l => l.name);
 
-            const missingLabels = labelsToApply.filter(
-              l => !currentLabels.includes(l)
+            const levelLabels = ['level-1', 'level-2', 'level-3'];
+
+            const labelsToRemove = currentLabels.filter(l =>
+              levelLabels.includes(l) && l !== level
             );
 
-            if (missingLabels.length > 0) {
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number,
+                  name: label
+                });
+              } catch (err) {
+                core.warning(`Failed removing label ${label}: ${err.message}`);
+              }
+            }
 
+            if (!currentLabels.includes(level)) {
               await github.rest.issues.addLabels({
                 owner,
                 repo,
                 issue_number,
-                labels: missingLabels
+                labels: [level]
+              });
+            }
+
+            // ─────────────────────────────────────────────
+            // Apply contributor program label
+            // ─────────────────────────────────────────────
+            let contributorProgramLabel = null;
+
+            if (mentionsGSSOC) {
+              contributorProgramLabel = 'gssoc26';
+            }
+
+            if (mentionsNSOC) {
+              contributorProgramLabel = 'nsoc26';
+            }
+
+            if (
+              contributorProgramLabel &&
+              !currentLabels.includes(contributorProgramLabel)
+            ) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: [contributorProgramLabel]
               });
             }
 
@@ -322,18 +385,9 @@ jobs:
               issue_number,
               body:
                 `✅ Assigned @${username}\n\n` +
-
-                `📌 Program: \`${contributorLabel}\`\n` +
-                `📌 Contribution Level: \`${level}\`\n\n` +
-
-                `💡 Contribution Tip\n\n` +
-
-                `Please avoid opening many tiny PRs for related changes.\n\n` +
-
-                `If multiple fixes are closely related:\n` +
-                `- combine them into 1–2 well-structured PRs\n` +
-                `- avoid micro-PR spam\n` +
-                `- keep commits meaningful and focused\n\n` +
-
-                `Happy contributing 🚀`
+                `Program: \`${contributorProgramLabel}\`\n` +
+                `Detected contribution level: \`${level}\`\n\n` +
+                `⚠️ Maximum active assignments allowed: \`3\`\n\n` +
+                `📌 Please avoid opening multiple tiny PRs.\n` +
+                `We encourage contributors to combine related improvements into 1–2 meaningful PRs whenever possible.`
             });
