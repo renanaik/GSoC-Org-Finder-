@@ -1,4 +1,4 @@
-name: 📊 NSoC Contributor Leaderboard
+name: 📊 Contributor Leaderboard
 
 on:
   pull_request_target:
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: nsoc-leaderboard-${{ github.event.pull_request.number }}
+  group: leaderboard-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
