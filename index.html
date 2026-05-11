@@ -2065,7 +2065,7 @@
     if (bookmarkedSet.has(name)) bookmarkedSet.delete(name);
     else bookmarkedSet.add(name);
     localStorage.setItem('bookmarks', JSON.stringify([...bookmarkedSet]));
-    renderOrgs(false); // Refresh current view
+    renderOrgs(true); // Re-render grid so bookmark icon state updates correctly
     renderWatchlist();
   }
 
