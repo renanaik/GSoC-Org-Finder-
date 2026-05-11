@@ -6,6 +6,10 @@ on:
       - opened
       - edited
 
+  issue_comment:
+    types:
+      - created
+
 permissions:
   issues: write
   contents: read
@@ -24,19 +28,53 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issue = context.payload.issue;
-
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
+            // ─────────────────────────────────────────────
+            // Detect trigger source
+            // ─────────────────────────────────────────────
+            const isIssueEvent =
+              context.eventName === 'issues';
+
+            const isCommentEvent =
+              context.eventName === 'issue_comment';
+
+            const issue = isIssueEvent
+              ? context.payload.issue
+              : context.payload.issue;
+
             const issue_number = issue.number;
 
-            const title = (issue.title || '').trim();
-            const body = (issue.body || '').trim();
+            const username = isIssueEvent
+              ? issue.user.login
+              : context.payload.sender.login;
 
-            const fullText = `${title}\n${body}`.toLowerCase();
+            const senderType = isIssueEvent
+              ? issue.user.type
+              : context.payload.sender.type;
 
-            const username = issue.user.login;
+            const commentBody = isCommentEvent
+              ? (context.payload.comment.body || '').toLowerCase()
+              : '';
+
+            // ─────────────────────────────────────────────
+            // Run moderation on:
+            // 1. issue open/edit
+            // 2. assign me comments
+            // ─────────────────────────────────────────────
+            if (isCommentEvent) {
+              const wantsAssign =
+                commentBody.includes('/assign') ||
+                commentBody.includes('assign me');
+
+              if (!wantsAssign) {
+                core.info('Not an assignment comment.');
+                return;
+              }
+
+              core.info('Assignment comment detected. Running moderation.');
+            }
 
             // ─────────────────────────────────────────────
             // Ignore maintainers
@@ -46,12 +84,18 @@ jobs:
             ];
 
             if (maintainers.includes(username)) {
-              core.info('Maintainer issue detected. Skipping moderation.');
+              core.info('Maintainer detected. Skipping moderation.');
               return;
             }
 
+            const title = (issue.title || '').trim();
+            const body = (issue.body || '').trim();
+
+            const fullText =
+              `${title}\n${body}`.toLowerCase();
+
             // ─────────────────────────────────────────────
-            // Detect obvious bot/AI accounts
+            // Detect suspicious AI/bot usernames
             // ─────────────────────────────────────────────
             const suspiciousUserPatterns = [
               'bot',
@@ -64,18 +108,21 @@ jobs:
               'gemini'
             ];
 
-            const suspiciousUser = suspiciousUserPatterns.some(p =>
-              username.toLowerCase().includes(p)
-            );
+            const suspiciousUser =
+              suspiciousUserPatterns.some(p =>
+                username.toLowerCase().includes(p)
+              );
 
-            if (suspiciousUser) {
+            if (
+              senderType === 'Bot' ||
+              suspiciousUser
+            ) {
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
                 body:
-                  '❌ Automated bot/AI-generated issue accounts are not allowed in this repository.\n\n' +
-                  'Closing this issue automatically.'
+                  '❌ Bot/AI-generated issues or automated contributor accounts are not allowed in this repository.'
               });
 
               await github.rest.issues.update({
@@ -89,7 +136,7 @@ jobs:
             }
 
             // ─────────────────────────────────────────────
-            // Detect AI-slop / prompt leakage
+            // Detect AI-generated issue content
             // ─────────────────────────────────────────────
             const aiPatterns = [
               'chatgpt',
@@ -97,28 +144,26 @@ jobs:
               'claude ai',
               'gemini ai',
               'as an ai',
-              'here is the prompt',
+              'prompt:',
               'generate a bug report',
               'write an issue',
               'ai generated',
-              'prompt:',
-              'fix this issue using',
               'copilot generated',
-              'llm',
-              'large language model',
-              'this issue was generated',
               'rewrite this issue',
               'make this more professional',
               'dear maintainer',
               'certainly! here',
               'sure, here is',
-              'i apologize',
-              'hope this helps'
+              'hope this helps',
+              'this issue was generated',
+              'large language model',
+              'llm'
             ];
 
-            const matchedAiPatterns = aiPatterns.filter(p =>
-              fullText.includes(p)
-            );
+            const matchedAiPatterns =
+              aiPatterns.filter(p =>
+                fullText.includes(p)
+              );
 
             if (matchedAiPatterns.length > 0) {
               await github.rest.issues.createComment({
@@ -126,18 +171,24 @@ jobs:
                 repo,
                 issue_number,
                 body:
-                  '❌ This issue appears to contain AI-generated/promotional/prompt-leaked content.\n\n' +
+                  '❌ This issue appears to contain AI-generated or prompt-leaked content.\n\n' +
                   'Detected patterns:\n' +
-                  matchedAiPatterns.map(p => `- \`${p}\``).join('\n') +
-                  '\n\nPlease rewrite the issue manually with clear reproduction details and repository-specific context.'
+                  matchedAiPatterns
+                    .map(p => `- \`${p}\``)
+                    .join('\n') +
+                  '\n\nPlease rewrite the issue manually with proper repository-specific details.'
               });
 
-              await github.rest.issues.addLabels({
-                owner,
-                repo,
-                issue_number,
-                labels: ['invalid']
-              });
+              try {
+                await github.rest.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number,
+                  labels: ['invalid']
+                });
+              } catch (err) {
+                core.warning(err.message);
+              }
 
               await github.rest.issues.update({
                 owner,
@@ -150,60 +201,67 @@ jobs:
             }
 
             // ─────────────────────────────────────────────
-            // Validate minimum quality
+            // Validate issue quality
             // ─────────────────────────────────────────────
-            if (title.length < 10 || body.length < 40) {
+            if (title.length < 10) {
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
                 body:
-                  '❌ Issue quality check failed.\n\n' +
-                  'Please provide:\n' +
-                  '- a meaningful title\n' +
-                  '- proper reproduction steps\n' +
-                  '- expected vs actual behavior\n' +
-                  '- repository-specific context'
+                  '❌ Issue title is too short.\n\nPlease provide a meaningful repository-specific title.'
               });
 
-              await github.rest.issues.addLabels({
+              return;
+            }
+
+            if (body.length < 40) {
+              await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number,
-                labels: ['needs-more-info']
+                body:
+                  '❌ Issue description is too short.\n\nPlease provide:\n' +
+                  '- proper reproduction steps\n' +
+                  '- expected vs actual behavior\n' +
+                  '- repository-specific details'
               });
 
               return;
             }
 
             // ─────────────────────────────────────────────
-            // Search for duplicate issues
+            // Detect duplicate issues
             // ─────────────────────────────────────────────
-            const existingIssues = await github.paginate(
-              github.rest.issues.listForRepo,
-              {
-                owner,
-                repo,
-                state: 'open',
-                per_page: 100
-              }
-            );
+            const existingIssues =
+              await github.paginate(
+                github.rest.issues.listForRepo,
+                {
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100
+                }
+              );
 
-            const normalize = (text) =>
+            const normalize = text =>
               text
                 .toLowerCase()
                 .replace(/[^a-z0-9 ]/g, '')
                 .replace(/\s+/g, ' ')
                 .trim();
 
-            const currentTitle = normalize(title);
+            const currentTitle =
+              normalize(title);
 
             let duplicateIssue = null;
 
             for (const existing of existingIssues) {
-              if (existing.number === issue_number) continue;
+              if (existing.number === issue_number)
+                continue;
 
-              const existingTitle = normalize(existing.title || '');
+              const existingTitle =
+                normalize(existing.title || '');
 
               // Exact match
               if (existingTitle === currentTitle) {
@@ -211,17 +269,24 @@ jobs:
                 break;
               }
 
-              // Partial similarity
-              const currentWords = currentTitle.split(' ');
-              const existingWords = existingTitle.split(' ');
+              // Similarity match
+              const currentWords =
+                currentTitle.split(' ');
 
-              const overlap = currentWords.filter(w =>
-                existingWords.includes(w)
-              );
+              const existingWords =
+                existingTitle.split(' ');
+
+              const overlap =
+                currentWords.filter(w =>
+                  existingWords.includes(w)
+                );
 
               const similarity =
                 overlap.length /
-                Math.max(currentWords.length, existingWords.length);
+                Math.max(
+                  currentWords.length,
+                  existingWords.length
+                );
 
               if (similarity >= 0.75) {
                 duplicateIssue = existing;
