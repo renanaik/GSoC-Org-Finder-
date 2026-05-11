@@ -27,43 +27,89 @@ jobs:
 
             Our maintainers will review this issue shortly 🚀
 
-            ### Before contributing
+            ---
 
-            Please read the contribution guidelines carefully:
+            ## 📘 Before Contributing
+
+            Please read the contribution guide carefully before requesting assignment:
 
             👉 https://github.com/S3DFX-CYBER/GSoC-Org-Finder-/blob/main/CONTRIBUTING.md
 
-            ### Assignment System
+            ---
 
-            To work on this issue, comment:
+            ## 🏷️ NSoC'26 / GSSoC'26 Requirement
+
+            Please clearly mention whether you are contributing via:
+
+            - \`NSoC'26\`
+            - \`GSSoC'26\`
+            - or as a regular contributor
+
+            Example:
+
+            \`\`\`
+            I am contributing under NSoC'26
+            \`\`\`
+
+            or
+
+            \`\`\`
+            I am contributing under GSSoC'26
+            \`\`\`
+
+            ⚠️ Assignment requests without this information may be rejected automatically.
+
+            ---
+
+            ## ⏳ GSSoC Assignment Restriction
+
+            GSSoC contributors will only be allowed to take issue assignments after:
+
+            ### 🗓️ May 15th, 12:00 AM IST
+
+            Before that date, assignment requests from GSSoC contributors will be automatically blocked by the assignment workflow.
+
+            ---
+
+            ## 🤖 Assignment System
+
+            To request assignment, comment:
 
             \`\`\`
             /assign
             \`\`\`
 
-            or:
+            or
 
             \`\`\`
             assign me
             \`\`\`
 
-            The assignment bot will automatically validate:
-            - issue quality
-            - contribution level
+            The smart assignment workflow automatically validates:
+
             - contributor eligibility
+            - NSoC/GSSoC participation mention
+            - active issue assignment limits
+            - contribution level eligibility
             - repository contribution rules
 
-            ### Important Guidelines
+            ---
+
+            ## ⚠️ Important Repository Rules
 
             - Do not start working before assignment
+            - Maximum 3 active assigned issues per contributor
+            - Contributors are encouraged to combine related fixes into 1–2 quality PRs instead of many small PRs
             - Level 3 issues require previous merged PRs
             - PRs without assignment may be closed
-            - Low-quality/spam PRs may be rejected
+            - Spam or low-quality PRs may be rejected
             - Follow the zero-build, zero-dependency philosophy
 
-            ### Repository
+            ---
 
-            🔗 https://github.com/S3DFX-CYBER/GSoC-Org-Finder-
+            ## 🔗 Repository
+
+            https://github.com/S3DFX-CYBER/GSoC-Org-Finder-
 
             Happy contributing 🎉
             `;
