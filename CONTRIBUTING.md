@@ -239,6 +239,30 @@ Low-effort PR spam may be rejected.
 
 ---
 
+## 🔕 Maintainer Ping Policy
+
+Please avoid repeatedly pinging maintainers for:
+- issue assignment
+- PR reviews
+- label updates
+- merge requests
+- priority escalation
+
+Maintainers review contributions in queue order whenever possible.
+
+Excessive pinging, spam comments, or DM requests may result in:
+- comment deletion
+- temporary assignment removal
+- spam labeling for repeated abuse
+
+Please allow reasonable review time before following up.
+
+Recommended wait times:
+- Issue assignment: 12–24 hours
+- PR review: 24–72 hours
+
+----
+
 ## Contribution Levels
 
 ### 🟢 Level 1 — Beginner Friendly
