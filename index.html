@@ -2060,12 +2060,21 @@
     }
   });
 
+  function refreshOrgGridPreservingVisibleCount() {
+    const previousVisibleCount = visibleCount;
+    const grid = document.getElementById('orgGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    visibleCount = previousVisibleCount; // preserve pagination state
+    renderOrgs(false); // re-render currently visible window
+  }
+
   function toggleBookmark(e, name) {
     if (e) e.stopPropagation();
     if (bookmarkedSet.has(name)) bookmarkedSet.delete(name);
     else bookmarkedSet.add(name);
     localStorage.setItem('bookmarks', JSON.stringify([...bookmarkedSet]));
-    renderOrgs(true); // Re-render grid so bookmark icon state updates correctly
+    refreshOrgGridPreservingVisibleCount();
     renderWatchlist();
   }
 
