@@ -30,113 +30,70 @@ jobs:
             const username = issue.user.login;
             const title = (issue.title || '').trim();
 
-            // Ignore bots
-            if (issue.user.type === 'Bot') {
-              console.log('Ignoring bot issue');
-              return;
-            }
-
-            // Fetch current labels
+            if (issue.user.type === 'Bot') return;
+            
             const labels = (issue.labels || []).map(l => l.name.toLowerCase());
+            if (labels.includes('research')) return;
+            
+            if (title.length < 8) return;
 
-            // Skip research issues
-            if (labels.includes('research')) {
-              console.log('Research issue — skipping duplicate check');
-              return;
-            }
-
-            // Helper: Upsert comment (prevents spam)
-            async function upsertComment(marker, body) {
-              const { data: comments } = await github.rest.issues.listComments({
-                owner, repo, issue_number, per_page: 100
-              });
-
-              const existing = comments.find(c => 
-                c.user.type === 'Bot' && c.body.includes(marker)
-              );
-
-              if (existing) {
-                await github.rest.issues.updateComment({
-                  owner, repo, comment_id: existing.id, body
-                });
-              } else {
-                await github.rest.issues.createComment({
-                  owner, repo, issue_number, body
-                });
-              }
-            }
-
-            // Normalize title for comparison
             const normalize = str => 
-              str
-                .toLowerCase()
-                .replace(/[^a-z0-9\s]/g, '')
-                .replace(/\s+/g, ' ')
-                .trim();
-
+              str.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+            
             const currentTitle = normalize(title);
 
-            if (currentTitle.length < 8) {
-              console.log('Title too short — skipping duplicate check');
-              return;
-            }
-
-            // Fetch all open issues
-            const existingIssues = await github.paginate(
-              github.rest.issues.listForRepo,
-              {
-                owner,
-                repo,
-                state: 'open',
-                per_page: 100
-              }
-            );
+            const existingIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, 
+              repo, 
+              state: 'open', 
+              per_page: 100
+            });
 
             let duplicateIssue = null;
-
             for (const existing of existingIssues) {
-              if (existing.number === issue_number) continue;
-              if (existing.pull_request) continue; // skip PRs
+              if (existing.number === issue_number || existing.pull_request) continue;
+              if ((existing.labels || []).some(l => l.name.toLowerCase() === 'research')) continue;
 
-              const existingLabels = (existing.labels || []).map(l => l.name.toLowerCase());
-              if (existingLabels.includes('research')) continue;
-
-              const existingTitle = normalize(existing.title || '');
-
-              // Match if normalized titles are identical
-              if (existingTitle === currentTitle) {
+              if (normalize(existing.title || '') === currentTitle) {
                 duplicateIssue = existing;
                 break;
               }
             }
 
-            // Duplicate found
             if (duplicateIssue) {
-              const bodyText = `## 🔁 Duplicate Issue Detected
+              const bodyText = `## 🔁 Duplicate Issue Detected\n\n` +
+                `Hi @${username}, this issue appears to be a duplicate of:\n\n` +
+                `➡️ #${duplicateIssue.number}\n\n` +
+                `Maintainers may close this issue to keep discussion in one place.\n\n` +
+                `If this is not a duplicate, please explain the difference.`;
 
-Hi @${username}, this issue looks very similar to an existing one:
+              const { data: comments } = await github.rest.issues.listComments({
+                owner, repo, issue_number, per_page: 100
+              });
 
-➡️ #${duplicateIssue.number} — [View it here](/${owner}/${repo}/issues/${duplicateIssue.number})
+              const marker = '<!-- duplicate-detector -->';
+              const existingComment = comments.find(c => c.body.includes(marker));
 
-To keep discussions organized, maintainers may close this issue as duplicate.
-
-If you believe this is a **different** issue, please comment with more details and reference the other issue.`;
-
-              await upsertComment('Duplicate Issue Detected', bodyText);
-
-              try {
-                await github.rest.issues.addLabels({
-                  owner,
-                  repo,
-                  issue_number,
-                  labels: ['duplicate']
+              if (existingComment) {
+                await github.rest.issues.updateComment({
+                  owner, 
+                  repo, 
+                  comment_id: existingComment.id, 
+                  body: bodyText
                 });
-              } catch (e) {
-                console.log('Label already exists');
+              } else {
+                await github.rest.issues.createComment({
+                  owner, 
+                  repo, 
+                  issue_number, 
+                  body: bodyText
+                });
               }
 
-              console.log(`Duplicate detected: #${issue_number} → #${duplicateIssue.number}`);
-              return;
+              await github.rest.issues.addLabels({
+                owner, 
+                repo, 
+                issue_number, 
+                labels: ['duplicate']
+              }).catch(() => {});
             }
-
-            console.log('No duplicate found for issue #' + issue_number);
