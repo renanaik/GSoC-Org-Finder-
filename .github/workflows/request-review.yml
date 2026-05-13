@@ -3,12 +3,14 @@ name: 👥 Request Reviewers
 on:
   pull_request_target:
     types:
-      - labeled
-      - synchronize
+      - opened
       - reopened
+      - labeled
+      - ready_for_review
 
 permissions:
   pull-requests: write
+  issues: write
   contents: read
 
 concurrency:
@@ -19,8 +21,8 @@ jobs:
   request-reviewers:
     runs-on: ubuntu-latest
 
-    # Only run after Stage 1 passes
     if: |
+      !github.event.pull_request.draft &&
       contains(github.event.pull_request.labels.*.name, 'stage-1-approved')
 
     steps:
@@ -43,136 +45,125 @@ jobs:
             const prNumber = pr.number;
 
             // ─────────────────────────────────────────────
-            // Current labels
+            // Labels
             // ─────────────────────────────────────────────
-            const labels =
-              (pr.labels || []).map(
-                l => l.name.toLowerCase()
-              );
+            const labels = (pr.labels || []).map(
+              l => l.name.toLowerCase()
+            );
 
             const isGssoc =
-              labels.includes('gssoc26') ||
-              labels.includes('gssoc-review');
+              labels.includes('gssoc26');
 
             // ─────────────────────────────────────────────
             // Prevent duplicate reviewer requests
             // ─────────────────────────────────────────────
-            const existingReviews =
-              await github.paginate(
-                github.rest.pulls.listRequestedReviewers,
-                {
-                  owner,
-                  repo,
-                  pull_number: prNumber
-                }
-              );
+            const requested =
+              await github.rest.pulls.listRequestedReviewers({
+                owner,
+                repo,
+                pull_number: prNumber
+              });
 
             const alreadyRequested =
-              existingReviews.users?.map(
+              (requested.data.users || []).map(
                 u => u.login.toLowerCase()
-              ) || [];
+              );
+
+            // Already has 2 reviewers requested
+            if (alreadyRequested.length >= 2) {
+
+              core.info(
+                'Reviewers already requested. Skipping.'
+              );
+
+              return;
+            }
 
             // ─────────────────────────────────────────────
-            // GSSOC mentor pool
+            // Load reviewer pool
             // ─────────────────────────────────────────────
-            const gssocMentors = [
-              '12fahed',
-              'sabeenaviklar',
-              'nihalawasthi',
-              'knoxiboy',
-              'magic-peach',
-              'lourduradjou',
-              'kunalverma2512',
-              'anubhavxdev',
-              'Eswaramuthu',
-              'Harsh-2006-git',
-              'adithyan-css',
-              'xthxr',
-              'Devnil434',
-              'aayushi1806sharma-afk',
-              'AditthyaSS',
-              'Satya900',
-              'JoeCelaster',
-              'AshutoshRaj1260',
-              'topshe23',
-              'Ayushh-Sharmaa',
-              'piyushdotcomm',
-              'coder-zs-cse',
-              'bishal2623',
-              'Ayush-Patel-56',
-              'Mohit-368',
-              'diksha78dev',
-              'Mrigakshi-Rathore'
-            ];
+            const reviewerFile = isGssoc
+              ? '.github/reviewers/gssoc-mentors.json'
+              : '.github/reviewers/nsoc-reviewers.json';
 
-            // ─────────────────────────────────────────────
-            // Load NSOC reviewers
-            // ─────────────────────────────────────────────
-            let nsocReviewers = [];
+            let reviewerPool = [];
 
             try {
 
               const raw = fs.readFileSync(
-                '.github/reviewers/nsoc-reviewers.json',
+                reviewerFile,
                 'utf8'
               );
 
               const parsed = JSON.parse(raw);
 
-              nsocReviewers =
-                parsed.nsoc_reviewers || [];
+              reviewerPool =
+                parsed.reviewers || [];
 
             } catch (err) {
 
-              core.warning(
-                'Could not load nsoc-reviewers.json'
-              );
-            }
-
-            // ─────────────────────────────────────────────
-            // Select reviewer pool
-            // ─────────────────────────────────────────────
-            let reviewerPool =
-              isGssoc
-                ? gssocMentors
-                : nsocReviewers;
-
-            // Remove PR author
-            reviewerPool =
-              reviewerPool.filter(
-                r =>
-                  r.toLowerCase() !==
-                  pr.user.login.toLowerCase()
-              );
-
-            // Remove already requested reviewers
-            reviewerPool =
-              reviewerPool.filter(
-                r =>
-                  !alreadyRequested.includes(
-                    r.toLowerCase()
-                  )
-              );
-
-            // ─────────────────────────────────────────────
-            // Shuffle reviewers
-            // ─────────────────────────────────────────────
-            reviewerPool.sort(
-              () => Math.random() - 0.5
-            );
-
-            // Pick 2 reviewers
-            const selected =
-              reviewerPool.slice(0, 2);
-
-            if (selected.length === 0) {
-
-              core.info(
-                'No reviewers available.'
+              core.setFailed(
+                `Failed to load reviewer pool: ${reviewerFile}`
               );
 
               return;
             }
+
+            // ─────────────────────────────────────────────
+            // Remove PR author
+            // ─────────────────────────────────────────────
+            reviewerPool =
+              reviewerPool.filter(
+                reviewer =>
+                  reviewer.toLowerCase() !==
+                  pr.user.login.toLowerCase()
+              );
+
+            // ─────────────────────────────────────────────
+            // Remove already requested reviewers
+            // ─────────────────────────────────────────────
+            reviewerPool =
+              reviewerPool.filter(
+                reviewer =>
+                  !alreadyRequested.includes(
+                    reviewer.toLowerCase()
+                  )
+              );
+
+            // ─────────────────────────────────────────────
+            // Ensure enough reviewers exist
+            // ─────────────────────────────────────────────
+            if (reviewerPool.length < 2) {
+
+              core.setFailed(
+                'Not enough eligible reviewers available.'
+              );
+
+              return;
+            }
+
+            // ─────────────────────────────────────────────
+            // Fisher-Yates shuffle
+            // ─────────────────────────────────────────────
+            for (
+              let i = reviewerPool.length - 1;
+              i > 0;
+              i--
+            ) {
+
+              const j = Math.floor(
+                Math.random() * (i + 1)
+              );
+
+              [reviewerPool[i], reviewerPool[j]] =
+                [reviewerPool[j], reviewerPool[i]];
+            }
+
+            // ─────────────────────────────────────────────
+            // Select exactly 2 reviewers
+            // ─────────────────────────────────────────────
+            const selected =
+              reviewerPool.slice(0, 2);
 
             // ─────────────────────────────────────────────
             // Request reviewers
@@ -189,21 +180,24 @@ jobs:
             );
 
             // ─────────────────────────────────────────────
-            // Add labels
+            // Add tracking label
             // ─────────────────────────────────────────────
+            const reviewLabel = isGssoc
+              ? 'mentor-review-requested'
+              : 'nsoc-review-requested';
+
             try {
 
               await github.rest.issues.addLabels({
                 owner,
                 repo,
                 issue_number: prNumber,
-                labels: [
-                  isGssoc
-                    ? 'mentor-review-requested'
-                    : 'nsoc-review-requested'
-                ]
+                labels: [reviewLabel]
               });
 
             } catch (err) {
-              core.info(err.message);
+
+              core.warning(
+                `Failed to add label: ${err.message}`
+              );
             }
