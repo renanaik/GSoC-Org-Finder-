@@ -1,54 +1,146 @@
 #!/usr/bin/env bash
 # .github/scripts/create-pipeline-labels.sh
 #
-# Creates only the NEW pipeline labels needed by the stage manager.
-# Does NOT touch existing labels (dco-missing, dco-verified, ai-slop,
-# low-quality-pr, possible-duplicate-pr, gssoc26, nsoc26, etc.).
+# Bootstraps PR lifecycle labels used by:
+# - pr-stage-manager.yml
+# - request-reviewers.yml
+# - review-approval-gate.yml
+# - pa-final-gate.yml
+#
+# This script ONLY manages lifecycle pipeline labels.
+#
+# It intentionally does NOT modify existing labels like:
+# - dco-missing
+# - dco-verified
+# - ai-slop
+# - low-quality-pr
+# - possible-duplicate-pr
+# - gssoc26
+# - nsoc26
 #
 # Usage:
 #   bash .github/scripts/create-pipeline-labels.sh
-#   bash .github/scripts/create-pipeline-labels.sh S3DFX-CYBER/GSoC-Org-Finder-
 #
-# Requires: gh CLI authenticated with write access.
+#   bash .github/scripts/create-pipeline-labels.sh \
+#     S3DFX-CYBER/GSoC-Org-Finder-
+#
+# Requirements:
+# - GitHub CLI (gh)
+# - Authenticated with repository write access
 
 set -euo pipefail
 
 REPO="${1:-}"
-REPO_ARG=""
-[[ -n "$REPO" ]] && REPO_ARG="--repo $REPO"
 
+REPO_ARG=()
+
+if [[ -n "$REPO" ]]; then
+  REPO_ARG+=(--repo "$REPO")
+fi
+
+# ─────────────────────────────────────────────
+# Upsert label
+# ─────────────────────────────────────────────
 upsert_label() {
-  local name="$1" color="$2" desc="$3"
-  if gh label list $REPO_ARG --search "$name" --json name -q '.[].name' \
-       2>/dev/null | grep -qx "$name"; then
-    printf '  ↩  exists  %s\n' "$name"
-    gh label edit "$name" --color "$color" --description "$desc" $REPO_ARG 2>/dev/null || true
+
+  local name="$1"
+  local color="$2"
+  local description="$3"
+
+  if gh label list "${REPO_ARG[@]}" \
+      --search "$name" \
+      --json name \
+      --jq '.[].name' \
+      2>/dev/null | grep -Fxq "$name"; then
+
+    printf '  ↩  updated  %s\n' "$name"
+
+    gh label edit "$name" \
+      --color "$color" \
+      --description "$description" \
+      "${REPO_ARG[@]}" \
+      >/dev/null 2>&1 || true
+
   else
-    printf '  +  create  %s\n' "$name"
-    gh label create "$name" --color "$color" --description "$desc" $REPO_ARG
+
+    printf '  +  created  %s\n' "$name"
+
+    gh label create "$name" \
+      --color "$color" \
+      --description "$description" \
+      "${REPO_ARG[@]}" \
+      >/dev/null
   fi
 }
 
-echo "=== 🚦 PR Pipeline — Label Bootstrap ==="
+echo "=== 🚦 PR Pipeline Label Bootstrap ==="
 echo ""
 
-# ── Stage 1 pipeline labels ────────────────────────────────────────────────
-echo "Stage 1:"
-upsert_label "stage-1-approved"  "0e8a16"  "All automated validation checks passed"
-upsert_label "needs-fixes"       "d93f0b"  "Automated checks failed — contributor action required"
+# ─────────────────────────────────────────────
+# Stage 1
+# ─────────────────────────────────────────────
+echo "Stage 1 — Automated Validation"
 
-# ── Stage 2 pipeline labels ────────────────────────────────────────────────
-echo ""
-echo "Stage 2:"
-upsert_label "gssoc-review"          "1d76db"  "GSSOC PR — awaiting approved GSSOC mentor review"
-upsert_label "gssoc-mentor-approved" "0075ca"  "Approved by a verified GSSOC mentor"
-upsert_label "nsoc-reviewed"         "5319e7"  "NSOC PR — approved by qualified reviewer"
+upsert_label \
+  "stage-1-approved" \
+  "0e8a16" \
+  "All automated validation checks passed"
 
-# ── Stage 3 pipeline labels ────────────────────────────────────────────────
-echo ""
-echo "Stage 3:"
-upsert_label "pa-review"   "e4e669"  "Under PA/maintainer final review"
-upsert_label "merge-ready" "0e8a16"  "All pipeline stages passed — safe to merge"
+upsert_label \
+  "needs-fixes" \
+  "d93f0b" \
+  "Automated checks failed — contributor action required"
 
 echo ""
-echo "✅ Done. Existing labels (dco-*, ai-slop, gssoc26, nsoc26, etc.) were not modified."
+
+# ─────────────────────────────────────────────
+# Stage 2
+# ─────────────────────────────────────────────
+echo "Stage 2 — Human Review"
+
+upsert_label \
+  "mentor-review-requested" \
+  "1d76db" \
+  "Awaiting GSSOC mentor review"
+
+upsert_label \
+  "nsoc-review-requested" \
+  "5319e7" \
+  "Awaiting NSOC reviewer review"
+
+upsert_label \
+  "gssoc-mentor-approved" \
+  "0052cc" \
+  "Approved by verified GSSOC mentors"
+
+upsert_label \
+  "nsoc-reviewed" \
+  "6f42c1" \
+  "Approved by qualified NSOC reviewers"
+
+upsert_label \
+  "changes-requested" \
+  "b60205" \
+  "Changes requested during review"
+
+echo ""
+
+# ─────────────────────────────────────────────
+# Stage 3
+# ─────────────────────────────────────────────
+echo "Stage 3 — Maintainer Review"
+
+upsert_label \
+  "pa-review" \
+  "fbca04" \
+  "Approved by PA or maintainer pending final merge gate"
+
+upsert_label \
+  "merge-ready" \
+  "0e8a16" \
+  "All review stages passed — safe to merge"
+
+echo ""
+echo "✅ Pipeline lifecycle labels synchronized successfully."
+echo ""
+echo "Existing non-pipeline labels were intentionally not modified."
