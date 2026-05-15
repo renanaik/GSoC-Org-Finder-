@@ -584,6 +584,10 @@
       <div class="relative max-w-xl mb-6 sm:mb-8">
         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">search</span>
         <input id="hero-search" type="text" placeholder="Search organization names..." class="w-full bg-white border-2 border-zinc-100 rounded-2xl py-3 sm:py-4 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all shadow-lg shadow-zinc-200/50" />
+        <!-- # Added clear button for search input -->
+        <button id="hero-search-clear" aria-label="Clear search" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 focus:outline-none hidden">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
       </div>
       <!-- Surprise Button -->
       <div class="mb-8 sm:mb-10">
@@ -2789,7 +2793,39 @@ if(org.ideas){
       document.getElementById('searchInput').value = e.target.value;
       document.getElementById('orgs').scrollIntoView({ behavior: 'smooth' });
       applyFilters();
+      // #❤️ Show/hide clear button based on input content
+      const clearBtn = document.getElementById('hero-search-clear');
+      if (clearBtn) {
+        if (e.target.value && e.target.value.trim().length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+      }
     });
+
+    // #❤️ Added reset handler for clearing query
+    const heroClear = document.getElementById('hero-search-clear');
+    if (heroClear) {
+      // show clear button initially if there is existing text
+      if (heroSearch.value && heroSearch.value.trim().length > 0) heroClear.classList.remove('hidden');
+      heroClear.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        heroSearch.value = '';
+        const hiddenSearch = document.getElementById('searchInput');
+        if (hiddenSearch) hiddenSearch.value = '';
+        heroSearch.focus();
+        heroClear.classList.add('hidden');
+        applyFilters();
+      });
+      // allow keyboard activation via Enter/Space
+      heroClear.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          heroClear.click();
+        }
+      });
+    }
   }
 
   // Quick-filter chips — mutually exclusive with each other, but additive with
