@@ -436,7 +436,6 @@ footer a:hover{text-decoration:underline}
   .compare-panel{max-width:98vw}
   .m-metrics{grid-template-columns:repeat(2,1fr)}
   .hero{padding-top: 64px;}
-  .nav-links a:nth-child(n+5){display:none}
 }
 
 /* ═══════════════════════════════════════════
@@ -716,4 +715,4 @@ footer a:hover{text-decoration:underline}
      Added minimal margin on the results grid and enforce filter-card stacking
      so the layout flows correctly on small screens without changing desktop */
   .filter-card{position:relative;z-index:2}
-  .grid{margin-top:12px;position:relative;z-index:1}
+  .org-grid{margin-top:12px;position:relative;z-index:1}
