@@ -28,12 +28,12 @@ body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-
 
 /* ── NAV ── */
 .nav{position:sticky;top:0;z-index:60;background:var(--nav-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transition:background .3s,border-color .3s}
-.nav-inner{max-width:1340px;margin:0 auto;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:8px}
+.nav-inner{max-width:1340px;margin:0 auto;min-height:58px;display:flex;align-items:center;justify-content:space-between;padding:8px 24px;gap:8px}
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .gsoc-logo{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FBBC04,var(--orange));border-radius:8px;font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:white;letter-spacing:-0.04em;box-shadow:0 2px 8px rgba(244,107,14,.3)}
 .nav-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.02em;transition:color .3s}
 .nav-title em{font-style:italic;color:var(--orange)}
-.nav-right{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
+.nav-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
 
 /* ── COUNTDOWN BANNER ── */
 .countdown-banner{background:linear-gradient(135deg,var(--orange-pale),var(--orange-mid));border-bottom:1px solid var(--orange-border);padding:8px 24px;text-align:center;font-size:12px;font-weight:600;color:var(--orange-deep);display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
@@ -97,7 +97,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',sans-
 
 /* ── FILTERS ── */
 .wrap{max-width:1340px;margin:0 auto;padding:0 24px}
-.filter-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px;transition:background .3s,border-color .3s}
+.filter-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px;transition:background .3s,border-color .3s; scroll-margin-top: 70px;}
 .filter-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
 .filters-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:16px}
 .fg{display:flex;flex-direction:column;gap:5px}
@@ -435,6 +435,8 @@ footer a:hover{text-decoration:underline}
   .stat-item{flex-shrink:0;min-width:64px}
   .compare-panel{max-width:98vw}
   .m-metrics{grid-template-columns:repeat(2,1fr)}
+  .hero{padding-top: 64px;}
+  .nav-links a:nth-child(n+5){display:none}
 }
 
 /* ═══════════════════════════════════════════
@@ -442,7 +444,7 @@ footer a:hover{text-decoration:underline}
 ═══════════════════════════════════════════ */
 @media(max-width:640px){
   /* Nav */
-  .nav-inner{padding:0 12px;gap:4px;flex-wrap:nowrap;overflow-x:auto}
+  .nav-inner{padding:8px 12px;gap:6px;flex-wrap:wrap;overflow-x:hidden}
   .nav-logo{font-size:14px;flex-shrink:0}
   .nav-right{gap:4px;flex-shrink:0}
   .nav-right .btn-contribute span{display:none}
@@ -471,7 +473,7 @@ footer a:hover{text-decoration:underline}
   .search-box{width:100%}
   .search-input{font-size:13px}
   .btn-reset{width:100%;text-align:center;padding:9px}
-  .chips-row{flex-wrap:wrap;gap:5px}
+  .chips{gap:5px ; padding-top: 10px;}
   .chip{font-size:11px;padding:5px 10px}
   .pills-section{gap:6px}
   .pill{font-size:11px;padding:4px 10px}
@@ -558,6 +560,8 @@ footer a:hover{text-decoration:underline}
   .org-card{padding:12px}
   .org-logo{width:34px;height:34px}
   .org-name{font-size:12px}
+  .wrap{padding: 0 10px; overflow-x: hidden;}
+  .grid{grid-template-columns:1fr;width: 100%;}
 }
 
 /* Style of scroll-to-top button */
@@ -707,3 +711,9 @@ footer a:hover{text-decoration:underline}
   color: var(--orange-deep);
   background: var(--orange-pale);
 }
+
+  /* Fix mobile overlap: ensure filter section doesn't overlap the org cards
+     Added minimal margin on the results grid and enforce filter-card stacking
+     so the layout flows correctly on small screens without changing desktop */
+  .filter-card{position:relative;z-index:2}
+  .grid{margin-top:12px;position:relative;z-index:1}
